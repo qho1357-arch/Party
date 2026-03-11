@@ -756,21 +756,41 @@ async function joinRoom(rid) {
     await rset(db(`rooms/${rid}/members/${ME.username}`), {name:ME.name,avatar:ME.avatar||'',gender:ME.gender||'',joinedAt:Date.now()});
     document.getElementById('mainScreen').classList.remove('active');
     document.getElementById('roomScreen').classList.add('active');
-    killL('room');
+    killL('room','micBlockedRoom','micblk','webrtc_listen','voice_watch','voice','webrtc');
     startRoomL(rid);
   } catch(e) { toast('Lỗi vào phòng: '+e.message); }
 }
 window.joinRoom = joinRoom;
 
 function startRoomL(rid) {
-  // Listener riêng cho micBlocked (realtime cập nhật voice bar)
+  // Listener micBlocked — cập nhật voice bar realtime
   Ls.micBlockedRoom = ronVal(db(`rooms/${rid}/micBlocked`), () => {
-    // Khi blocked list thay đổi, cập nhật lại voice bar
     rget(db(`rooms/${rid}/voice`)).then(vs => {
-      if(vs.exists()) updateVoiceBar(vs.val());
-      else updateVoiceBar({});
+      updateVoiceBar(vs.exists() ? vs.val() : {});
     });
   });
+
+  // Listener voiceCmd — luôn active (nhận lệnh mute/unmute từ chủ phòng)
+  Ls.micblk = ronVal(db(`rooms/${rid}/voiceCmd/${ME.username}`), snap => {
+    if(!snap.exists()) return;
+    const d = snap.val();
+    if(d.cmd === 'mute') {
+      if(roomMicOn) {
+        stopRoomMic();
+        const btn = document.getElementById('rmicBtn');
+        if(btn){ btn.classList.remove('mic-on'); btn.textContent='🎤'; }
+      }
+      toast('🚫 Chủ phòng đã tắt mic của bạn!');
+      rrem(db(`rooms/${rid}/voiceCmd/${ME.username}`));
+    } else if(d.cmd === 'unmute') {
+      toast('🔓 Chủ phòng đã mở mic! Bấm 🎤 để bật lại.');
+      rrem(db(`rooms/${rid}/voiceCmd/${ME.username}`));
+    }
+  });
+
+  // ✅ LISTEN-ONLY — luôn chạy ngay khi vào phòng dù chưa bật mic
+  // Người không bật mic vẫn nhận được audio từ người đang bật
+  setupListenOnly(rid);
 
   Ls.room = ronVal(db(`rooms/${rid}`), snap => {
     if(!snap.exists()) { forceLeave(); toast('Phòng đã bị xóa!'); return; }
@@ -903,7 +923,7 @@ window.kickU = kickU;
 
 async function leaveRoom() {
   if(!curRoom) return;
-  killL('room','micBlockedRoom','micblk');
+  killL('room','micBlockedRoom','micblk','webrtc_listen','voice_watch');
   try {
     await rrem(db(`rooms/${curRoom}/chat`));
     await rrem(db(`rooms/${curRoom}/seats/${ME.username}`));
@@ -924,7 +944,8 @@ async function leaveRoom() {
 window.leaveRoom = leaveRoom;
 
 function forceLeave() {
-  killL('room'); curRoom = null;
+  killL('room','micBlockedRoom','micblk','webrtc_listen','voice_watch','voice','webrtc');
+  curRoom = null;
   stopRoomMic();
   document.getElementById('rAudio').pause();
   document.getElementById('rAudio').src = '';
@@ -1779,7 +1800,7 @@ async function toggleRoomMic() {
   // Kiểm tra bị chặn
   const blk = await rget(db(`rooms/${curRoom}/micBlocked/${ME.username}`));
   if(blk.exists() && blk.val()) {
-    toast('🚫 Chủ phòng đã chặn mic của bạn!'); return;
+    toast('🚫 Chủ phòng đang chặn mic của bạn!'); return;
   }
 
   if(roomMicOn) {
@@ -1788,14 +1809,17 @@ async function toggleRoomMic() {
     toast('🔇 Đã tắt mic');
   } else {
     try {
+      // Xóa voiceCmd cũ trước khi bật lại
+      await rrem(db(`rooms/${curRoom}/voiceCmd/${ME.username}`));
       localStream = await navigator.mediaDevices.getUserMedia({audio:true,video:false});
       roomMicOn = true;
       btn.classList.add('mic-on'); btn.textContent='🔴';
-      // Ghi vào Firebase để báo đang dùng mic
       await rset(db(`rooms/${curRoom}/voice/${ME.username}`), {
-        name:ME.name, avatar:ME.avatar||'', ts:Date.now(), muted:false
+        name:ME.name, avatar:ME.avatar||'', ts:Date.now()
       });
       rDisc(db(`rooms/${curRoom}/voice/${ME.username}`)).remove();
+      // Gửi offer tới TẤT CẢ người trong phòng (kể cả chưa bật mic)
+      await offerToAllMembers();
       setupVoiceListeners();
       toast('🎤 Mic bật');
     } catch(e) { toast('❌ Không truy cập mic: '+e.message); }
@@ -1808,40 +1832,75 @@ function stopRoomMic() {
   if(localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
   Object.values(roomPeers).forEach(pc=>{ try{pc.close()}catch(e){} });
   roomPeers = {};
-  // Dọn audio elements
   document.querySelectorAll('audio[id^="pa_"]').forEach(a=>{ a.srcObject=null; a.remove(); });
   if(curRoom) rrem(db(`rooms/${curRoom}/voice/${ME.username}`));
-  killL('voice','webrtc','micblk');
+  // Chỉ kill voice+webrtc (active send), GIỮ webrtc_listen+voice_watch để tiếp tục nghe
+  killL('voice','webrtc');
   updateVoiceBar({});
 }
 
-// ── Chủ phòng: chặn mic user ──
+// ── Chủ phòng: chặn / mở mic user ──
 async function hostBlockMic(uid) {
+  if(!curRoom) return;
   const snap = await rget(db(`rooms/${curRoom}`));
   if(!snap.exists() || snap.val().host !== ME.username) return;
   const blocked = await rget(db(`rooms/${curRoom}/micBlocked/${uid}`));
   const isBlocked = blocked.exists() && blocked.val();
+
   if(isBlocked) {
+    // MỞ MIC: xóa blocked + xóa voiceCmd cũ + gửi lệnh unmute
     await rrem(db(`rooms/${curRoom}/micBlocked/${uid}`));
+    await rrem(db(`rooms/${curRoom}/voiceCmd/${uid}`));
+    await rset(db(`rooms/${curRoom}/voiceCmd/${uid}`), {cmd:'unmute', by:ME.username, ts:Date.now()});
     toast(`🔓 Đã mở mic cho ${uid}`);
   } else {
+    // CHẶN MIC: set blocked + gửi lệnh mute
     await rset(db(`rooms/${curRoom}/micBlocked/${uid}`), true);
-    // Gửi lệnh tắt mic tới user
     await rset(db(`rooms/${curRoom}/voiceCmd/${uid}`), {cmd:'mute', by:ME.username, ts:Date.now()});
     toast(`🔇 Đã chặn mic của ${uid}`);
   }
 }
 window.hostBlockMic = hostBlockMic;
 
-// ── Setup listeners khi bật mic ──
-function setupVoiceListeners() {
-  killL('voice','webrtc','micblk');
+// ── LISTEN-ONLY: chạy ngay khi vào phòng, không cần bật mic ──
+// Nhận offer từ người đang bật mic, trả answer, nhận audio stream
+function setupListenOnly(rid) {
+  killL('webrtc_listen');
+  Ls.webrtc_listen = ronVal(db(`rooms/${rid}/webrtc/${ME.username}`), snap => {
+    if(!snap.exists()) return;
+    Object.entries(snap.val()).forEach(([fromUid, data]) => {
+      if(data.offer)  handleOffer(fromUid, data.offer);
+      if(data.answer) handleAnswer(fromUid, data.answer);
+      if(data.ice)    handleIce(fromUid, data.ice);
+    });
+  });
 
-  // 1. Theo dõi danh sách người đang mic
+  // Theo dõi voice list để cập nhật voice bar (không cần bật mic)
+  killL('voice_watch');
+  Ls.voice_watch = ronVal(db(`rooms/${rid}/voice`), snap => {
+    const users = snap.exists() ? snap.val() : {};
+    updateVoiceBar(users);
+    // Đóng PC với người đã rời
+    Object.keys(roomPeers).forEach(uid => {
+      if(!users[uid]) {
+        try{roomPeers[uid].close()}catch(e){}
+        delete roomPeers[uid];
+        const a = document.getElementById('pa_'+uid);
+        if(a){ a.srcObject=null; a.remove(); }
+      }
+    });
+  });
+}
+
+// ── VOICE ACTIVE: chạy thêm khi bật mic (gửi offer tới mọi người) ──
+function setupVoiceListeners() {
+  killL('voice','webrtc'); // KHÔNG kill webrtc_listen, voice_watch, micblk
+
+  // Theo dõi danh sách người đang mic để tạo offer
   Ls.voice = ronVal(db(`rooms/${curRoom}/voice`), snap => {
     const users = snap.exists() ? snap.val() : {};
     updateVoiceBar(users);
-    // Tạo offer tới người mới (so sánh username để tránh 2 bên cùng offer)
+    // Tạo offer tới người chưa có kết nối
     Object.keys(users).forEach(uid => {
       if(uid !== ME.username && !roomPeers[uid] && ME.username > uid) {
         createOffer(uid);
@@ -1858,28 +1917,7 @@ function setupVoiceListeners() {
     });
   });
 
-  // 2. Lắng nghe signaling từ peer khác
-  Ls.webrtc = ronVal(db(`rooms/${curRoom}/webrtc/${ME.username}`), snap => {
-    if(!snap.exists()) return;
-    Object.entries(snap.val()).forEach(([fromUid, data]) => {
-      if(data.offer)  handleOffer(fromUid, data.offer);
-      if(data.answer) handleAnswer(fromUid, data.answer);
-      if(data.ice)    handleIce(fromUid, data.ice);
-    });
-  });
-
-  // 3. Lắng nghe lệnh từ chủ phòng (mute/unmute)
-  Ls.micblk = ronVal(db(`rooms/${curRoom}/voiceCmd/${ME.username}`), snap => {
-    if(!snap.exists()) return;
-    const d = snap.val();
-    if(d.cmd === 'mute' && roomMicOn) {
-      stopRoomMic();
-      const btn = document.getElementById('rmicBtn');
-      if(btn){ btn.classList.remove('mic-on'); btn.textContent='🎤'; }
-      toast('🚫 Chủ phòng đã tắt mic của bạn!');
-      rrem(db(`rooms/${curRoom}/voiceCmd/${ME.username}`));
-    }
-  });
+  // Signaling (offer/answer/ice) — dùng chung webrtc_listen đã setup
 }
 
 // ── Cập nhật voice bar — chủ phòng thấy nút chặn ──
@@ -1914,18 +1952,29 @@ async function updateVoiceBar(users) {
   }).join('');
 }
 
-// ── WebRTC: tạo offer ──
+// ── WebRTC: tạo offer tới 1 peer ──
 async function createOffer(toUid) {
   if(roomPeers[toUid]) return;
   const pc = newPC(toUid);
   roomPeers[toUid] = pc;
-  // Luôn add local track để gửi audio (nếu có)
   if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-  // Thêm silent track để nhận audio dù không có mic
   else addSilentTrack(pc);
   const offer = await pc.createOffer({offerToReceiveAudio:true});
   await pc.setLocalDescription(offer);
   await rset(db(`rooms/${curRoom}/webrtc/${toUid}/${ME.username}/offer`), {sdp:offer.sdp,type:offer.type});
+}
+
+// ── Gửi offer tới TẤT CẢ members trong phòng (kể cả chưa bật mic) ──
+async function offerToAllMembers() {
+  if(!curRoom) return;
+  const snap = await rget(db(`rooms/${curRoom}/members`));
+  if(!snap.exists()) return;
+  const members = Object.keys(snap.val());
+  for(const uid of members) {
+    if(uid !== ME.username && !roomPeers[uid] && ME.username > uid) {
+      await createOffer(uid);
+    }
+  }
 }
 
 // ── WebRTC: xử lý offer ──
