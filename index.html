@@ -204,6 +204,12 @@ audio{display:none}
 /* IMG PREVIEW FULL */
 .imgfull{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9998;display:flex;align-items:center;justify-content:center}
 .imgfull img{max-width:96vw;max-height:92vh;border-radius:10px}
+/* MIC BLOCKED */
+.vuser{position:relative}
+.vuser .vblock{position:absolute;top:-3px;right:-3px;width:16px;height:16px;background:var(--rd);border-radius:50%;font-size:.6rem;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--bg)}
+.vuser.blocked img{filter:grayscale(1) opacity(.5)}
+.vuser.muted img{border-color:var(--rd)!important}
+.vmic-off{opacity:.4!important}
 
 </style>
 </head>
@@ -292,7 +298,11 @@ audio{display:none}
   <audio id="rAudio"></audio>
   <div class="rca" id="rca"></div>
   <!-- VOICE BAR phòng -->
-  <div class="vbar" id="vbar"><span style="font-size:.65rem;color:var(--mu);white-space:nowrap">🎙 Phòng thoại:</span><div id="vbarUsers" style="display:flex;gap:6px"></div></div>
+  <div class="vbar" id="vbar">
+    <span style="font-size:.65rem;color:var(--mu);white-space:nowrap;flex-shrink:0">🎙</span>
+    <div id="vbarUsers" style="display:flex;gap:8px;align-items:center"></div>
+    <span id="vbarEmpty" style="font-size:.65rem;color:var(--mu)">Chưa ai bật mic</span>
+  </div>
   <div class="cib">
     <button id="rmicBtn" onclick="toggleRoomMic()" style="background:var(--c2);border:1px solid var(--br);color:var(--tx);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">🎤</button>
     <label style="width:34px;height:34px;border-radius:50%;background:var(--c2);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;flex-shrink:0">
@@ -753,6 +763,15 @@ async function joinRoom(rid) {
 window.joinRoom = joinRoom;
 
 function startRoomL(rid) {
+  // Listener riêng cho micBlocked (realtime cập nhật voice bar)
+  Ls.micBlockedRoom = ronVal(db(`rooms/${rid}/micBlocked`), () => {
+    // Khi blocked list thay đổi, cập nhật lại voice bar
+    rget(db(`rooms/${rid}/voice`)).then(vs => {
+      if(vs.exists()) updateVoiceBar(vs.val());
+      else updateVoiceBar({});
+    });
+  });
+
   Ls.room = ronVal(db(`rooms/${rid}`), snap => {
     if(!snap.exists()) { forceLeave(); toast('Phòng đã bị xóa!'); return; }
     const r = snap.val();
@@ -884,14 +903,14 @@ window.kickU = kickU;
 
 async function leaveRoom() {
   if(!curRoom) return;
-  killL('room');
+  killL('room','micBlockedRoom','micblk');
   try {
     await rrem(db(`rooms/${curRoom}/chat`));
     await rrem(db(`rooms/${curRoom}/seats/${ME.username}`));
     await rrem(db(`rooms/${curRoom}/members/${ME.username}`));
     await rrem(db(`rooms/${curRoom}/voice/${ME.username}`));
-    // Dọn webrtc signaling
     await rrem(db(`rooms/${curRoom}/webrtc/${ME.username}`));
+    await rrem(db(`rooms/${curRoom}/voiceCmd/${ME.username}`));
   } catch(e) {}
   stopRoomMic();
   document.getElementById('rAudio').pause();
@@ -1747,27 +1766,38 @@ window.toggleDMMic = toggleDMMic;
 // 🎤 ROOM VOICE — WebRTC P2P multi-peer
 // =====================================================
 let localStream = null, roomPeers = {}, roomMicOn = false;
-// Signaling qua Firebase: rooms/{id}/webrtc/{fromUser}/{toUser}/...
+// =====================================================
+// 🎙 ROOM VOICE — WebRTC P2P + Host mic control
+// Signaling: rooms/{id}/webrtc/{toUser}/{fromUser}/
+// Blocked:   rooms/{id}/micBlocked/{uid} = true
+// =====================================================
 
 async function toggleRoomMic() {
+  if(!curRoom) return;
   const btn = document.getElementById('rmicBtn');
+
+  // Kiểm tra bị chặn
+  const blk = await rget(db(`rooms/${curRoom}/micBlocked/${ME.username}`));
+  if(blk.exists() && blk.val()) {
+    toast('🚫 Chủ phòng đã chặn mic của bạn!'); return;
+  }
+
   if(roomMicOn) {
     stopRoomMic();
-    btn.classList.remove('mic-on');
-    btn.textContent = '🎤';
+    btn.classList.remove('mic-on'); btn.textContent='🎤';
     toast('🔇 Đã tắt mic');
   } else {
     try {
-      localStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+      localStream = await navigator.mediaDevices.getUserMedia({audio:true,video:false});
       roomMicOn = true;
-      btn.classList.add('mic-on');
-      btn.textContent = '🔴';
-      toast('🎤 Mic bật — đang kết nối...');
-      // Thông báo cho phòng biết mình đang dùng mic
-      await rset(db(`rooms/${curRoom}/voice/${ME.username}`), {name:ME.name, avatar:ME.avatar||'', ts:Date.now()});
+      btn.classList.add('mic-on'); btn.textContent='🔴';
+      // Ghi vào Firebase để báo đang dùng mic
+      await rset(db(`rooms/${curRoom}/voice/${ME.username}`), {
+        name:ME.name, avatar:ME.avatar||'', ts:Date.now(), muted:false
+      });
       rDisc(db(`rooms/${curRoom}/voice/${ME.username}`)).remove();
-      // Lắng nghe người khác vào/ra voice
       setupVoiceListeners();
+      toast('🎤 Mic bật');
     } catch(e) { toast('❌ Không truy cập mic: '+e.message); }
   }
 }
@@ -1776,76 +1806,143 @@ window.toggleRoomMic = toggleRoomMic;
 function stopRoomMic() {
   roomMicOn = false;
   if(localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
-  Object.values(roomPeers).forEach(pc => pc.close());
+  Object.values(roomPeers).forEach(pc=>{ try{pc.close()}catch(e){} });
   roomPeers = {};
+  // Dọn audio elements
+  document.querySelectorAll('audio[id^="pa_"]').forEach(a=>{ a.srcObject=null; a.remove(); });
   if(curRoom) rrem(db(`rooms/${curRoom}/voice/${ME.username}`));
-  killL('voice','webrtc');
+  killL('voice','webrtc','micblk');
   updateVoiceBar({});
 }
 
+// ── Chủ phòng: chặn mic user ──
+async function hostBlockMic(uid) {
+  const snap = await rget(db(`rooms/${curRoom}`));
+  if(!snap.exists() || snap.val().host !== ME.username) return;
+  const blocked = await rget(db(`rooms/${curRoom}/micBlocked/${uid}`));
+  const isBlocked = blocked.exists() && blocked.val();
+  if(isBlocked) {
+    await rrem(db(`rooms/${curRoom}/micBlocked/${uid}`));
+    toast(`🔓 Đã mở mic cho ${uid}`);
+  } else {
+    await rset(db(`rooms/${curRoom}/micBlocked/${uid}`), true);
+    // Gửi lệnh tắt mic tới user
+    await rset(db(`rooms/${curRoom}/voiceCmd/${uid}`), {cmd:'mute', by:ME.username, ts:Date.now()});
+    toast(`🔇 Đã chặn mic của ${uid}`);
+  }
+}
+window.hostBlockMic = hostBlockMic;
+
+// ── Setup listeners khi bật mic ──
 function setupVoiceListeners() {
-  killL('voice');
-  // Theo dõi danh sách người đang dùng mic
+  killL('voice','webrtc','micblk');
+
+  // 1. Theo dõi danh sách người đang mic
   Ls.voice = ronVal(db(`rooms/${curRoom}/voice`), snap => {
     const users = snap.exists() ? snap.val() : {};
     updateVoiceBar(users);
-    // Kết nối P2P với người mới
+    // Tạo offer tới người mới (so sánh username để tránh 2 bên cùng offer)
     Object.keys(users).forEach(uid => {
-      if(uid !== ME.username && !roomPeers[uid]) {
-        // Người join sau sẽ gửi offer
-        if(ME.username > uid) createOffer(uid);
+      if(uid !== ME.username && !roomPeers[uid] && ME.username > uid) {
+        createOffer(uid);
       }
     });
-    // Đóng kết nối với người đã rời
+    // Đóng PC với người đã rời
     Object.keys(roomPeers).forEach(uid => {
-      if(!users[uid]) { roomPeers[uid].close(); delete roomPeers[uid]; }
+      if(!users[uid]) {
+        try{roomPeers[uid].close()}catch(e){}
+        delete roomPeers[uid];
+        const a = document.getElementById('pa_'+uid);
+        if(a){ a.srcObject=null; a.remove(); }
+      }
     });
   });
-  // Lắng nghe signaling messages gửi đến mình
+
+  // 2. Lắng nghe signaling từ peer khác
   Ls.webrtc = ronVal(db(`rooms/${curRoom}/webrtc/${ME.username}`), snap => {
     if(!snap.exists()) return;
     Object.entries(snap.val()).forEach(([fromUid, data]) => {
-      if(data.offer) handleOffer(fromUid, data.offer, data.offerTs);
+      if(data.offer)  handleOffer(fromUid, data.offer);
       if(data.answer) handleAnswer(fromUid, data.answer);
-      if(data.ice) handleIce(fromUid, data.ice);
+      if(data.ice)    handleIce(fromUid, data.ice);
     });
+  });
+
+  // 3. Lắng nghe lệnh từ chủ phòng (mute/unmute)
+  Ls.micblk = ronVal(db(`rooms/${curRoom}/voiceCmd/${ME.username}`), snap => {
+    if(!snap.exists()) return;
+    const d = snap.val();
+    if(d.cmd === 'mute' && roomMicOn) {
+      stopRoomMic();
+      const btn = document.getElementById('rmicBtn');
+      if(btn){ btn.classList.remove('mic-on'); btn.textContent='🎤'; }
+      toast('🚫 Chủ phòng đã tắt mic của bạn!');
+      rrem(db(`rooms/${curRoom}/voiceCmd/${ME.username}`));
+    }
   });
 }
 
-function updateVoiceBar(users) {
+// ── Cập nhật voice bar — chủ phòng thấy nút chặn ──
+async function updateVoiceBar(users) {
   const el = document.getElementById('vbarUsers');
+  const emptyEl = document.getElementById('vbarEmpty');
   if(!el) return;
-  if(!Object.keys(users).length) { el.innerHTML='<span style="font-size:.65rem;color:var(--mu)">Chưa ai bật mic</span>'; return; }
-  el.innerHTML = Object.entries(users).map(([uid,d]) => `
-    <div class="vuser" id="vu_${uid}">
+  const keys = Object.keys(users);
+  if(emptyEl) emptyEl.style.display = keys.length ? 'none' : '';
+  if(!keys.length) { el.innerHTML=''; return; }
+
+  // Lấy thông tin phòng để check host + blocked
+  let isHost = false, blocked = {};
+  if(curRoom) {
+    const rs = await rget(db(`rooms/${curRoom}`));
+    if(rs.exists()) isHost = rs.val().host === ME.username;
+    const bs = await rget(db(`rooms/${curRoom}/micBlocked`));
+    if(bs.exists()) blocked = bs.val();
+  }
+
+  el.innerHTML = keys.map(uid => {
+    const d = users[uid];
+    const isBlocked = blocked[uid];
+    const blockBtn = isHost && uid !== ME.username
+      ? `<div class="vblock" onclick="hostBlockMic('${uid}')" title="${isBlocked?'Mở mic':'Chặn mic'}">${isBlocked?'🔓':'🔇'}</div>`
+      : '';
+    return `<div class="vuser${isBlocked?' blocked':''}" id="vu_${uid}">
       <img src="${av({avatar:d.avatar,name:d.name||uid})}" id="vui_${uid}">
+      ${blockBtn}
       <span class="vun">${esc(d.name||uid)}</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
+// ── WebRTC: tạo offer ──
 async function createOffer(toUid) {
+  if(roomPeers[toUid]) return;
   const pc = newPC(toUid);
   roomPeers[toUid] = pc;
+  // Luôn add local track để gửi audio (nếu có)
   if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-  const offer = await pc.createOffer();
+  // Thêm silent track để nhận audio dù không có mic
+  else addSilentTrack(pc);
+  const offer = await pc.createOffer({offerToReceiveAudio:true});
   await pc.setLocalDescription(offer);
-  await rset(db(`rooms/${curRoom}/webrtc/${toUid}/${ME.username}/offer`), {sdp:offer.sdp, type:offer.type});
-  await rset(db(`rooms/${curRoom}/webrtc/${toUid}/${ME.username}/offerTs`), Date.now());
+  await rset(db(`rooms/${curRoom}/webrtc/${toUid}/${ME.username}/offer`), {sdp:offer.sdp,type:offer.type});
 }
 
-async function handleOffer(fromUid, offer, ts) {
-  if(roomPeers[fromUid]) return; // đã có kết nối
+// ── WebRTC: xử lý offer ──
+async function handleOffer(fromUid, offer) {
+  if(roomPeers[fromUid]) return;
   const pc = newPC(fromUid);
   roomPeers[fromUid] = pc;
   if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  else addSilentTrack(pc);
   await pc.setRemoteDescription(new RTCSessionDescription(offer));
   const answer = await pc.createAnswer();
   await pc.setLocalDescription(answer);
-  await rset(db(`rooms/${curRoom}/webrtc/${fromUid}/${ME.username}/answer`), {sdp:answer.sdp, type:answer.type});
-  // Xóa offer đã xử lý
+  await rset(db(`rooms/${curRoom}/webrtc/${fromUid}/${ME.username}/answer`), {sdp:answer.sdp,type:answer.type});
   await rrem(db(`rooms/${curRoom}/webrtc/${ME.username}/${fromUid}/offer`));
 }
 
+// ── WebRTC: xử lý answer ──
 async function handleAnswer(fromUid, answer) {
   const pc = roomPeers[fromUid];
   if(!pc || pc.signalingState !== 'have-local-offer') return;
@@ -1853,67 +1950,90 @@ async function handleAnswer(fromUid, answer) {
   await rrem(db(`rooms/${curRoom}/webrtc/${ME.username}/${fromUid}/answer`));
 }
 
+// ── WebRTC: xử lý ICE ──
 async function handleIce(fromUid, iceList) {
   const pc = roomPeers[fromUid];
   if(!pc) return;
-  const items = Array.isArray(iceList) ? iceList : Object.values(iceList);
+  const items = Array.isArray(iceList) ? iceList : Object.values(iceList||{});
   for(const ice of items) {
     try { await pc.addIceCandidate(new RTCIceCandidate(ice)); } catch(e){}
   }
 }
 
+// ── Tạo RTCPeerConnection ──
 function newPC(remoteUid) {
   const pc = new RTCPeerConnection(STUN);
   const iceBuf = [];
+  let iceSent = false;
+
   pc.onicecandidate = async e => {
-    if(!e.candidate) {
-      // Gửi tất cả ICE candidates 1 lần
-      if(iceBuf.length) await rset(db(`rooms/${curRoom}/webrtc/${remoteUid}/${ME.username}/ice`), iceBuf);
-      return;
+    if(e.candidate) {
+      iceBuf.push({candidate:e.candidate.candidate, sdpMid:e.candidate.sdpMid, sdpMLineIndex:e.candidate.sdpMLineIndex});
+    } else if(!iceSent && iceBuf.length) {
+      iceSent = true;
+      await rset(db(`rooms/${curRoom}/webrtc/${remoteUid}/${ME.username}/ice`), iceBuf);
     }
-    iceBuf.push({candidate:e.candidate.candidate, sdpMid:e.candidate.sdpMid, sdpMLineIndex:e.candidate.sdpMLineIndex});
   };
+
   pc.ontrack = e => {
-    // Phát audio từ peer
+    if(!e.streams || !e.streams[0]) return;
     let audio = document.getElementById('pa_'+remoteUid);
     if(!audio) {
       audio = document.createElement('audio');
       audio.id = 'pa_'+remoteUid;
-      audio.autoplay = true;
+      audio.autoplay = true; audio.playsInline = true;
       audio.style.display = 'none';
       document.body.appendChild(audio);
     }
-    audio.srcObject = e.streams[0];
-    // Hiệu ứng "đang nói"
+    if(audio.srcObject !== e.streams[0]) {
+      audio.srcObject = e.streams[0];
+      audio.play().catch(()=>{});
+    }
     detectSpeaking(e.streams[0], remoteUid);
   };
+
   pc.onconnectionstatechange = () => {
-    if(pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
-      pc.close(); delete roomPeers[remoteUid];
+    if(['failed','disconnected','closed'].includes(pc.connectionState)) {
+      try{pc.close()}catch(e){}
+      delete roomPeers[remoteUid];
       const a = document.getElementById('pa_'+remoteUid);
-      if(a) a.remove();
+      if(a){ a.srcObject=null; a.remove(); }
     }
   };
   return pc;
 }
 
-// Phát hiện khi user đang nói (visual indicator)
-function detectSpeaking(stream, uid) {
+// Track im lặng — để nhận audio dù người dùng chưa bật mic
+function addSilentTrack(pc) {
   try {
     const ctx = new AudioContext();
+    const dst = ctx.createMediaStreamDestination();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    gain.gain.value = 0; // im lặng hoàn toàn
+    osc.connect(gain); gain.connect(dst);
+    osc.start();
+    dst.stream.getTracks().forEach(t => pc.addTrack(t, dst.stream));
+  } catch(e){}
+}
+
+// ── Hiệu ứng đang nói ──
+function detectSpeaking(stream, uid) {
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
     const src = ctx.createMediaStreamSource(stream);
-    const an = ctx.createAnalyser();
+    const an  = ctx.createAnalyser();
     an.fftSize = 256;
     src.connect(an);
     const data = new Uint8Array(an.frequencyBinCount);
-    const img = document.getElementById('vui_'+uid);
-    const check = () => {
-      if(!roomMicOn && !roomPeers[uid]) return;
+    function check() {
+      if(!document.getElementById('vui_'+uid)) return; // user đã rời
       an.getByteFrequencyData(data);
       const vol = data.reduce((a,b)=>a+b,0)/data.length;
-      if(img) img.classList.toggle('speaking', vol>15);
+      const img = document.getElementById('vui_'+uid);
+      if(img) img.classList.toggle('speaking', vol > 12);
       requestAnimationFrame(check);
-    };
+    }
     check();
   } catch(e){}
 }
@@ -2048,6 +2168,16 @@ function fmtDur(ms) {
           "$toUser": {
             "$fromUser": { ".write": true, ".read": true }
           }
+        },
+        "micBlocked": {
+          ".write": true,
+          ".read": true,
+          "$uid": { ".write": true, ".read": true }
+        },
+        "voiceCmd": {
+          ".write": true,
+          ".read": true,
+          "$uid": { ".write": true, ".read": true }
         }
       }
     },
