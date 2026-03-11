@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PartyZone 🎉</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root{--p:#ff6b9d;--s:#c44dff;--a:#ffcc00;--bg:#0d0a1a;--c1:#1a1530;--c2:#221d3a;--tx:#f0e6ff;--mu:#8b80a8;--gn:#00e096;--rd:#ff4d6d;--or:#ff9800;--br:rgba(255,255,255,.08)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+.hidden{display:none!important}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+#authScreen{background:linear-gradient(135deg,#0d0a1a,#1a0533,#0a1a2e);align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.box{background:var(--c1);border-radius:22px;padding:26px 20px;width:100%;max-width:420px;border:1px solid var(--br);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.logo h1{font-family:'Fredoka One',cursive;font-size:2.1rem;background:linear-gradient(90deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
+.logo p{color:var(--mu);font-size:.8rem;text-align:center;margin:3px 0 20px}
+.tabs{display:flex;gap:5px;background:var(--c2);border-radius:11px;padding:3px;margin-bottom:16px}
+.tab{flex:1;padding:9px;border:none;background:transparent;color:var(--mu);border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;font-size:.86rem;transition:.2s}
+.tab.on{background:linear-gradient(135deg,var(--p),var(--s));color:#fff}
+.fg{margin-bottom:11px}
+.fg label{display:block;font-size:.73rem;color:var(--mu);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;background:var(--c2);border:1px solid var(--br);border-radius:9px;padding:10px 12px;color:var(--tx);font-family:inherit;font-size:.9rem;outline:none;transition:.2s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(255,107,157,.12)}
+.fg textarea{resize:vertical;min-height:62px}
+.fg select option{background:var(--c1)}
+.btn{width:100%;padding:12px;border:none;border-radius:11px;font-family:inherit;font-weight:800;font-size:.93rem;cursor:pointer;transition:.2s}
+.btn-p{background:linear-gradient(135deg,var(--p),var(--s));color:#fff;box-shadow:0 4px 16px rgba(255,107,157,.32)}
+.btn-p:active{transform:scale(.97)}
+.btn-2{background:var(--c2);color:var(--tx);border:1px solid var(--br)}
+.btn-s{width:auto;padding:6px 12px;font-size:.76rem;border-radius:7px}
+.btn-d{background:linear-gradient(135deg,#ff4d6d,#c0392b);color:#fff}
+.btn-g{background:linear-gradient(135deg,var(--gn),#00b894);color:#fff}
+.btn-y{background:linear-gradient(135deg,var(--a),#ff9800);color:#000}
+/* NAV */
+.tnav{background:var(--c1);padding:10px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br);position:sticky;top:0;z-index:100}
+.tlogo{font-family:'Fredoka One',cursive;font-size:1.3rem;background:linear-gradient(90deg,var(--p),var(--s));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tright{display:flex;align-items:center;gap:8px}
+.kbdg{background:linear-gradient(135deg,var(--a),#ff9800);color:#000;font-weight:800;font-size:.76rem;padding:3px 9px;border-radius:18px}
+.nb{position:relative;background:var(--c2);border:none;color:var(--tx);width:33px;height:33px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.ndot{position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--rd);border-radius:50%;border:2px solid var(--c1)}
+.nav-av{width:31px;height:31px;border-radius:50%;object-fit:cover;border:2px solid var(--p);cursor:pointer}
+.bnav{background:var(--c1);border-top:1px solid var(--br);display:flex;padding:6px 0 2px;position:fixed;bottom:0;left:0;right:0;z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:3px;position:relative}
+.ni .ic{font-size:1.3rem}
+.ni .lb{font-size:.6rem;font-weight:700;color:var(--mu)}
+.ni.on .ic,.ni.on .lb{color:var(--p)}
+.ni .bdg{position:absolute;top:-1px;right:17%;background:var(--rd);color:#fff;font-size:.56rem;font-weight:800;padding:1px 4px;border-radius:9px;min-width:14px;text-align:center}
+.cnt{flex:1;overflow-y:auto;padding:13px;padding-bottom:74px}
+/* CARDS */
+.card{background:var(--c1);border-radius:14px;padding:13px;border:1px solid var(--br);margin-bottom:10px}
+.stitle{font-size:.7rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+/* SUGGEST */
+.sr{display:flex;gap:8px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
+.sr::-webkit-scrollbar{display:none}
+.sc{background:var(--c2);border-radius:13px;padding:11px 7px;text-align:center;min-width:104px;border:1px solid var(--br);flex-shrink:0}
+.sav{width:50px;height:50px;border-radius:50%;object-fit:cover;margin:0 auto 6px;display:block;border:2px solid var(--p)}
+.sname{font-size:.8rem;font-weight:700;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slv{font-size:.66rem;color:var(--a);font-weight:700}
+.sbtns{display:flex;gap:3px;margin-top:6px}
+.sbtns button{flex:1;padding:4px 2px;border:none;border-radius:6px;cursor:pointer;font-size:.65rem;font-weight:700;font-family:inherit}
+/* ROOM LIST */
+.rc{background:var(--c2);border-radius:12px;padding:12px;border:1px solid var(--br);margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.2s}
+.rc:active{transform:scale(.98)}
+.ric{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,var(--p),var(--s));display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.rinf{flex:1;min-width:0}
+.rname{font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmeta{font-size:.71rem;color:var(--mu)}
+.rcnt{background:var(--p);color:#fff;font-size:.71rem;font-weight:800;padding:2px 7px;border-radius:9px;flex-shrink:0}
+/* ROOM SCREEN */
+#roomScreen{background:var(--bg);display:none;flex-direction:column;height:100vh;overflow:hidden}
+#roomScreen.active{display:flex}
+.rtop{background:var(--c1);padding:10px 13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--br);flex-shrink:0}
+.bk{background:none;border:none;color:var(--tx);font-size:1.2rem;cursor:pointer;padding:3px}
+.rtinfo{flex:1}
+.rtname{font-weight:800;font-size:.95rem}
+.rtmeta{font-size:.7rem;color:var(--mu)}
+.rta{display:flex;gap:4px}
+.ibtn{background:var(--c2);border:none;color:var(--tx);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+/* SEATS */
+.sa{padding:9px;background:linear-gradient(180deg,#1a0a2e,#0d0a1a);flex-shrink:0}
+.srow{display:flex;gap:4px;justify-content:center;margin-bottom:4px}
+.seat{flex:1;max-width:calc(25% - 3px);background:var(--c2);border-radius:10px;padding:6px 2px;text-align:center;border:1.5px solid var(--br);cursor:pointer;position:relative;min-height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:.15s}
+.seat.occ{border-color:var(--p)}
+.seat.me{border-color:var(--a);background:rgba(255,204,0,.06)}
+.seat.hs{border-color:var(--s)}
+.snum{font-size:.56rem;color:var(--mu);position:absolute;top:3px;left:4px;font-weight:700}
+.crown{position:absolute;top:-5px;right:3px;font-size:.75rem}
+.sav2{width:32px;height:32px;border-radius:50%;object-fit:cover;margin-bottom:3px;border:1.5px solid var(--p)}
+.sdef{width:32px;height:32px;border-radius:50%;background:var(--c1);display:flex;align-items:center;justify-content:center;font-size:1.05rem;margin-bottom:3px}
+.sn{font-size:.6rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:97%}
+.plbl{font-size:.5rem;color:var(--p);font-weight:700}
+/* STANDING */
+.sta{padding:6px 10px;background:rgba(255,255,255,.02);border-top:1px solid var(--br);flex-shrink:0}
+.stalb{font-size:.66rem;color:var(--mu);font-weight:700;margin-bottom:4px}
+.stalist{display:flex;flex-wrap:wrap;gap:4px}
+.su{display:flex;align-items:center;gap:4px;background:var(--c2);border-radius:18px;padding:3px 8px 3px 3px;cursor:pointer}
+.suav{width:20px;height:20px;border-radius:50%;object-fit:cover}
+.sun{font-size:.66rem;font-weight:600}
+/* MUSIC */
+.mbar{background:var(--c2);border-top:1px solid var(--br);padding:6px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.minfo{flex:1;min-width:0}
+.mtit{font-size:.76rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mstat{font-size:.62rem;color:var(--mu)}
+/* ROOM CHAT */
+.rca{overflow-y:auto;padding:6px 10px;flex:1;min-height:80px}
+.cmsg{margin-bottom:6px;display:flex;gap:6px;align-items:flex-start}
+.cmsg.me{flex-direction:row-reverse}
+.cmav{width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.cbbl{background:var(--c2);border-radius:10px;padding:5px 8px;max-width:78%}
+.cmsg.me .cbbl{background:linear-gradient(135deg,var(--p),var(--s))}
+.cname{font-size:.6rem;color:rgba(255,255,255,.5);margin-bottom:1px;font-weight:700}
+.ctxt{font-size:.81rem;line-height:1.4;word-break:break-word}
+.cib{display:flex;gap:5px;padding:6px 10px;border-top:1px solid var(--br);background:var(--c1);flex-shrink:0}
+.cib input{flex:1;background:var(--c2);border:1px solid var(--br);border-radius:18px;padding:7px 12px;color:var(--tx);font-family:inherit;font-size:.86rem;outline:none}
+.csb{background:linear-gradient(135deg,var(--p),var(--s));border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* ROOM BOTTOM BAR */
+.rbb{background:var(--c1);padding:6px 10px;display:flex;gap:4px;border-top:1px solid var(--br);flex-wrap:wrap;flex-shrink:0}
+.rab{flex:1;min-width:calc(25% - 3px);background:var(--c2);border:1px solid var(--br);color:var(--tx);border-radius:8px;padding:6px 2px;cursor:pointer;font-size:.6rem;font-weight:700;font-family:inherit;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.rab .ri2{font-size:1rem}
+.rab:active{transform:scale(.95)}
+/* DM */
+#dmScreen{background:var(--bg)}
+.dh{background:var(--c1);padding:10px 13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--br);flex-shrink:0}
+.dhav{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--p)}
+.dhname{font-weight:700;font-size:.93rem}
+.dhmsg{flex:1;overflow-y:auto;padding:10px;padding-bottom:62px}
+.dm{margin-bottom:8px;display:flex;gap:6px;align-items:flex-end}
+.dm.me{flex-direction:row-reverse}
+.dmav{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0}
+.dmbbl{background:var(--c1);border-radius:12px;padding:7px 10px;max-width:76%}
+.dm.me .dmbbl{background:linear-gradient(135deg,var(--p),var(--s))}
+.dmtxt{font-size:.86rem;line-height:1.4;word-break:break-word}
+.dmtime{font-size:.57rem;color:rgba(255,255,255,.4);margin-top:2px}
+.dmib{position:fixed;bottom:0;left:0;right:0;background:var(--c1);padding:8px 12px;display:flex;gap:6px;border-top:1px solid var(--br);z-index:10}
+.dmib input{flex:1;background:var(--c2);border:1px solid var(--br);border-radius:18px;padding:8px 13px;color:var(--tx);font-family:inherit;font-size:.86rem;outline:none}
+.dmib button{background:linear-gradient(135deg,var(--p),var(--s));border:none;color:#fff;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* FRIENDS */
+.fi{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--br)}
+.fi:last-child{border-bottom:none}
+.fiaw{position:relative}
+.fiav{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--c2)}
+.odot{position:absolute;bottom:1px;right:1px;width:8px;height:8px;border-radius:50%;background:var(--gn);border:1.5px solid var(--c1)}
+.fiinfo{flex:1;min-width:0}
+.finame{font-weight:700;font-size:.86rem}
+.fist{font-size:.7rem;color:var(--mu)}
+.fiac{display:flex;gap:4px}
+/* PROFILE */
+.ph{background:linear-gradient(180deg,var(--c1),var(--bg));padding:16px 13px 13px;text-align:center}
+.pav{width:76px;height:76px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block;border:3px solid var(--p);box-shadow:0 0 16px rgba(255,107,157,.28)}
+.pname{font-size:1.1rem;font-weight:800}
+.plv{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,var(--a),#ff9800);color:#000;padding:2px 10px;border-radius:18px;font-size:.76rem;font-weight:800;margin:4px 0}
+.xpb{background:var(--c2);border-radius:18px;height:5px;margin:4px 0;overflow:hidden}
+.xpf{height:100%;background:linear-gradient(90deg,var(--p),var(--s));border-radius:18px;transition:.4s}
+.psts{display:flex;gap:6px;margin-top:10px}
+.stb{flex:1;background:var(--c2);border-radius:10px;padding:8px;text-align:center}
+.stnum{font-size:1.1rem;font-weight:800;color:var(--p)}
+.stlb{font-size:.6rem;color:var(--mu);font-weight:700}
+/* NOTIF */
+.nit{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--br);align-items:center}
+.nic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+/* MODALS */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.ov.hidden{display:none}
+.modal{background:var(--c1);border-radius:20px 20px 0 0;padding:17px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto}
+.mtit{font-size:1rem;font-weight:800;margin-bottom:13px;text-align:center}
+.mcls{position:absolute;top:12px;right:12px;background:var(--c2);border:none;color:var(--tx);width:27px;height:27px;border-radius:50%;cursor:pointer;font-size:.88rem;display:flex;align-items:center;justify-content:center}
+/* GIFTS */
+.gg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:11px}
+.git{background:var(--c2);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;border:2px solid transparent;transition:.2s}
+.git.sel{border-color:var(--p)}
+.gem{font-size:1.45rem;margin-bottom:2px}
+.gn{font-size:.56rem;color:var(--mu);font-weight:700}
+.gc{font-size:.6rem;color:var(--a);font-weight:800}
+/* COUPLE */
+.creq{background:linear-gradient(135deg,rgba(255,107,157,.08),rgba(196,77,255,.08));border:1px solid rgba(255,107,157,.22);border-radius:12px;padding:11px;margin-bottom:7px}
+/* HANG */
+.hbar{background:linear-gradient(135deg,rgba(0,224,150,.1),rgba(0,180,255,.1));border:1px solid rgba(0,224,150,.18);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.htimer{font-size:.92rem;font-weight:800;color:var(--gn)}
+/* TOAST */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--c1);border:1px solid var(--br);border-radius:10px;padding:8px 16px;font-size:.81rem;font-weight:700;z-index:9999;box-shadow:0 8px 28px rgba(0,0,0,.4);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .22s}
+.toast.show{opacity:1}
+audio{display:none}
+
+/* IMAGE MSG */
+.msg-img{max-width:200px;max-height:200px;border-radius:10px;display:block;margin-top:4px;cursor:pointer;object-fit:cover}
+/* VOICE MSG */
+.vmsg{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(0,180,255,.1);border-radius:10px;margin-top:3px;cursor:pointer;min-width:140px}
+.vmsg .vplay{width:28px;height:28px;border-radius:50%;background:var(--bl);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;border:none;cursor:pointer}
+.vmsg .vwave{flex:1;height:3px;background:var(--br);border-radius:2px;position:relative;overflow:hidden}
+.vmsg .vwave::after{content:'';position:absolute;left:0;top:0;height:100%;background:var(--bl);border-radius:2px;transition:width .1s}
+.vmsg .vdur{font-size:.65rem;color:var(--mu);flex-shrink:0}
+/* MIC BTN ACTIVE */
+.mic-on{background:linear-gradient(135deg,var(--rd),#c0392b)!important;animation:micPulse .8s ease infinite alternate}
+@keyframes micPulse{from{box-shadow:0 0 0 0 rgba(255,77,109,.4)}to{box-shadow:0 0 0 8px rgba(255,77,109,0)}}
+/* VOICE ROOM BAR */
+.vbar{display:flex;align-items:center;gap:6px;padding:6px 11px;background:rgba(0,224,150,.07);border-top:1px solid rgba(0,224,150,.15);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.vbar::-webkit-scrollbar{display:none}
+.vuser{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0}
+.vuser img{width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid var(--br)}
+.vuser img.speaking{border-color:var(--gn);box-shadow:0 0 8px rgba(0,224,150,.5)}
+.vuser .vun{font-size:.58rem;color:var(--mu);font-weight:700;max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* IMG PREVIEW FULL */
+.imgfull{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9998;display:flex;align-items:center;justify-content:center}
+.imgfull img{max-width:96vw;max-height:92vh;border-radius:10px}
+
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN — Firebase sẽ tự hiện sau khi kết nối -->
+<div id="authScreen" class="screen">
+  <div style="margin:auto;padding:14px;width:100%;max-width:420px">
+    <div class="box">
+      <div class="logo"><h1>🎉 PartyZone</h1><p>Tiệc chat vui nhộn mỗi ngày</p></div>
+      <div class="tabs">
+        <button class="tab on" id="tl" onclick="swTab('l')">Đăng nhập</button>
+        <button class="tab" id="tr" onclick="swTab('r')">Đăng ký</button>
+      </div>
+      <div id="lF">
+        <div class="fg"><label>Tên đăng nhập</label><input id="lu" placeholder="username" autocomplete="username"></div>
+        <div class="fg"><label>Mật khẩu</label><input id="lp" type="password" placeholder="••••••" autocomplete="current-password"></div>
+        <button class="btn btn-p" onclick="doLogin()">🚀 Đăng nhập</button>
+      </div>
+      <div id="rF" class="hidden">
+        <div class="fg"><label>Tên đăng nhập (chữ thường, số, _)</label><input id="ru" placeholder="vd: user123"></div>
+        <div class="fg"><label>Mật khẩu (≥6 ký tự)</label><input id="rp" type="password" placeholder="••••••"></div>
+        <div class="fg"><label>Tên hiển thị</label><input id="rn" placeholder="Tên của bạn"></div>
+        <div class="fg"><label>Tuổi</label><input id="ra" type="number" min="13" max="99" placeholder="18"></div>
+        <div class="fg"><label>Giới tính</label><select id="rg"><option>Nam</option><option>Nữ</option><option>Khác</option></select></div>
+        <div class="fg"><label>Tiểu sử</label><textarea id="rb" placeholder="Giới thiệu bản thân..."></textarea></div>
+        <div class="fg"><label>Link Avatar</label><input id="rv" type="url" placeholder="https://..."></div>
+        <button class="btn btn-p" onclick="doReg()">✨ Tạo tài khoản</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN SCREEN -->
+<div id="mainScreen" class="screen">
+  <div class="tnav">
+    <span class="tlogo">🎉 PartyZone</span>
+    <div class="tright">
+      <div class="kbdg" id="navKC">0 KC</div>
+      <button class="nb" onclick="swMain('notif')">🔔<span class="ndot hidden" id="ndot"></span></button>
+      <img class="nav-av" id="navAv" src="https://ui-avatars.com/api/?name=U" onclick="swMain('profile')">
+    </div>
+  </div>
+  <div class="cnt" id="cnt"></div>
+  <div class="bnav">
+    <div class="ni on" id="ni_home" onclick="swMain('home')"><div class="ic">🏠</div><div class="lb">Trang chủ</div></div>
+    <div class="ni" id="ni_rooms" onclick="swMain('rooms')"><div class="ic">🎮</div><div class="lb">Phòng</div></div>
+    <div class="ni" id="ni_friends" onclick="swMain('friends')"><div class="ic">👥</div><div class="lb">Bạn bè</div><span class="bdg hidden" id="fbdg"></span></div>
+    <div class="ni" id="ni_notif" onclick="swMain('notif')"><div class="ic">🔔</div><div class="lb">Thông báo</div><span class="bdg hidden" id="nbdg"></span></div>
+    <div class="ni" id="ni_profile" onclick="swMain('profile')"><div class="ic">👤</div><div class="lb">Hồ sơ</div></div>
+  </div>
+</div>
+
+<!-- DM SCREEN -->
+<div id="dmScreen" class="screen">
+  <div class="dh">
+    <button class="bk" onclick="closeDM()">←</button>
+    <img class="dhav" id="dmAv" src="">
+    <div style="flex:1"><div class="dhname" id="dmName"></div><div style="font-size:.7rem" id="dmSt"></div></div>
+    <button class="btn btn-d btn-s" onclick="delDMs()">🗑</button>
+  </div>
+  <div class="dhmsg" id="dmMsgs"></div>
+  <div class="dmib">
+    <button id="dmMicBtn" onclick="toggleDMMic()" style="background:var(--c2);border:1px solid var(--br);color:var(--tx);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">🎤</button>
+    <label style="width:38px;height:38px;border-radius:50%;background:var(--c2);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;flex-shrink:0" title="Gửi ảnh">
+      📷<input type="file" accept="image/*" style="display:none" onchange="sendDMImg(this)">
+    </label>
+    <input id="dmIn" placeholder="Nhắn tin..." onkeydown="if(event.key==='Enter')sendDM()">
+    <button onclick="sendDM()">➤</button>
+  </div>
+</div>
+
+<!-- ROOM SCREEN -->
+<div id="roomScreen" class="screen">
+  <div class="rtop">
+    <button class="bk" onclick="leaveRoom()">←</button>
+    <div class="rtinfo"><div class="rtname" id="rtName">Phòng</div><div class="rtmeta" id="rtMeta"></div></div>
+    <div class="rta">
+      <button class="ibtn hidden" id="editRBtn" onclick="showEditRoom()">✏️</button>
+      <button class="ibtn hidden" id="delRBtn" onclick="doDelRoom()">🗑️</button>
+    </div>
+  </div>
+  <div class="sa"><div class="srow" id="sTop"></div><div class="srow" id="sBot"></div></div>
+  <div class="sta"><div class="stalb">👣 Đứng trong phòng</div><div class="stalist" id="standL"></div></div>
+  <div class="mbar"><span id="mico">🎵</span><div class="minfo"><div class="mtit" id="mtit">Chưa phát nhạc</div><div class="mstat" id="mstat">Phòng yên tĩnh</div></div></div>
+  <audio id="rAudio"></audio>
+  <div class="rca" id="rca"></div>
+  <!-- VOICE BAR phòng -->
+  <div class="vbar" id="vbar"><span style="font-size:.65rem;color:var(--mu);white-space:nowrap">🎙 Phòng thoại:</span><div id="vbarUsers" style="display:flex;gap:6px"></div></div>
+  <div class="cib">
+    <button id="rmicBtn" onclick="toggleRoomMic()" style="background:var(--c2);border:1px solid var(--br);color:var(--tx);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">🎤</button>
+    <label style="width:34px;height:34px;border-radius:50%;background:var(--c2);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;flex-shrink:0">
+      📷<input type="file" accept="image/*" style="display:none" onchange="sendRoomImg(this)">
+    </label>
+    <input id="rci" placeholder="Nhắn tin phòng..." onkeydown="if(event.key==='Enter')sendRC()">
+    <button class="csb" onclick="sendRC()">➤</button>
+  </div>
+  <div class="rbb">
+    <button class="rab" onclick="showSeatMod()"><div class="ri2">🪑</div>Ghế</button>
+    <button class="rab" onclick="showGift()"><div class="ri2">🎁</div>Tặng quà</button>
+    <button class="rab" onclick="showCouple()"><div class="ri2">💑</div>Ghép cặp</button>
+    <button class="rab" onclick="toggleHang()"><div class="ri2" id="hic">☕</div><span id="hlb">Treo máy</span></button>
+    <button class="rab" onclick="showFrChat()"><div class="ri2">💬</div>Chat bạn</button>
+    <button class="rab" id="musicBtn" onclick="showMusicMod()"><div class="ri2">🎵</div>Nhạc</button>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="ov hidden" id="ovP"><div class="modal" style="position:relative"><button class="mcls" onclick="cl('ovP')">✕</button><div id="pvC"></div></div></div>
+<div class="ov hidden" id="ovSeat"><div class="modal"><div class="mtit">🪑 Chọn ghế</div><div id="seatC"></div><button class="btn btn-2" style="margin-top:8px" onclick="cl('ovSeat')">Đóng</button></div></div>
+<div class="ov hidden" id="ovGift"><div class="modal"><div class="mtit">🎁 Tặng quà</div><div id="giftC"></div><button class="btn btn-2" style="margin-top:8px" onclick="cl('ovGift')">Đóng</button></div></div>
+<div class="ov hidden" id="ovCp"><div class="modal"><div class="mtit">💑 Ghép cặp</div><div id="cpC"></div><button class="btn btn-2" style="margin-top:8px" onclick="cl('ovCp')">Đóng</button></div></div>
+<div class="ov hidden" id="ovM"><div class="modal">
+  <div class="mtit">🎵 Phát nhạc (Chủ phòng)</div>
+  <div class="fg"><label>Link nhạc (catbox direct mp3)</label><input id="murl" type="url" placeholder="https://files.catbox.moe/xxx.mp3"></div>
+  <div class="fg"><label>Tên bài hát</label><input id="mname" placeholder="Tên bài..."></div>
+  <button class="btn btn-p" onclick="setMusic()">▶ Phát</button>
+  <button class="btn btn-d" style="margin-top:7px" onclick="stopMusic()">⏹ Dừng</button>
+  <button class="btn btn-2" style="margin-top:7px" onclick="cl('ovM')">Đóng</button>
+</div></div>
+<div class="ov hidden" id="ovER"><div class="modal">
+  <div class="mtit">✏️ Sửa tên phòng</div>
+  <div class="fg"><label>Tên phòng</label><input id="erN"></div>
+  <button class="btn btn-p" onclick="saveRoom()">Lưu</button>
+  <button class="btn btn-2" style="margin-top:7px" onclick="cl('ovER')">Đóng</button>
+</div></div>
+<div class="ov hidden" id="ovCR"><div class="modal">
+  <div class="mtit">🎮 Tạo phòng mới</div>
+  <div class="fg"><label>Tên phòng</label><input id="crN" placeholder="Nhập tên phòng..."></div>
+  <button class="btn btn-p" onclick="doCreateRoom()">🚀 Tạo phòng</button>
+  <button class="btn btn-2" style="margin-top:7px" onclick="cl('ovCR')">Đóng</button>
+</div></div>
+<div class="ov hidden" id="ovEP"><div class="modal">
+  <div class="mtit">✏️ Sửa hồ sơ</div>
+  <div class="fg"><label>Tên hiển thị</label><input id="ep_n"></div>
+  <div class="fg"><label>Tuổi</label><input id="ep_a" type="number"></div>
+  <div class="fg"><label>Giới tính</label><select id="ep_g"><option>Nam</option><option>Nữ</option><option>Khác</option></select></div>
+  <div class="fg"><label>Tiểu sử</label><textarea id="ep_b"></textarea></div>
+  <div class="fg">
+    <label>Link Avatar</label>
+    <input id="ep_v" type="url" placeholder="https://i.imgur.com/xxx.jpg" oninput="prevAv(this.value)">
+    <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+      <img id="avPrev" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--p);flex-shrink:0" src="">
+      <div style="font-size:.73rem;color:var(--mu);line-height:1.5">Hỗ trợ: imgur, i.ibb.co, catbox.moe, v.v<br>Phải là link <b>trực tiếp</b> đến ảnh (.jpg .png .gif .webp)</div>
+    </div>
+  </div>
+  <button class="btn btn-p" onclick="saveProfile()">💾 Lưu</button>
+  <button class="btn btn-2" style="margin-top:7px" onclick="cl('ovEP')">Đóng</button>
+</div></div>
+<div class="ov hidden" id="ovFC"><div class="modal" style="display:flex;flex-direction:column">
+  <div class="mtit">💬 Chat bạn bè</div>
+  <div id="fcL" style="overflow-y:auto;max-height:55vh;margin-bottom:8px"></div>
+  <button class="btn btn-2" onclick="cl('ovFC')">Đóng</button>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================
+// ⚙️  FIREBASE CONFIG — CHỈ BẠN (CHỦ) SỬA PHẦN NÀY
+// =====================================================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBKgdey5oq5ucbDNUKWnygf0X7VATF4leU",
+  authDomain: "nongtrai-cd804.firebaseapp.com",
+  databaseURL: "https://nongtrai-cd804-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "nongtrai-cd804",
+  storageBucket: "nongtrai-cd804.firebasestorage.app",
+  messagingSenderId: "885153331941",
+  appId: "1:885153331941:web:39943357b2c9f74c5a320c",
+  measurementId: "G-DH139TWVNM"
+};
+// =====================================================
+// ⚙️  IMGBB API KEY — đăng ký miễn phí tại api.imgbb.com
+// =====================================================
+const IMGBB_KEY = "YOUR_IMGBB_API_KEY";
+// =====================================================
+// STUN servers (Google — miễn phí, không cần tài khoản)
+const STUN = { iceServers: [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' }
+]};
+// =====================================================
+
+const CDN = 'https://www.gstatic.com/firebasejs/10.12.2/';
+let DB, rref, rset, rget, rpush, ronVal, rrem, rupd, rDisc;
+
+// Khởi động Firebase ngay khi trang load
+(async () => {
+  const el = document.getElementById('authScreen');
+  try {
+    const [fbApp, fbDB] = await Promise.all([
+      import(CDN + 'firebase-app.js'),
+      import(CDN + 'firebase-database.js')
+    ]);
+    const app = fbApp.initializeApp(FIREBASE_CONFIG);
+    DB      = fbDB.getDatabase(app);
+    rref    = fbDB.ref;   rset  = fbDB.set;    rget  = fbDB.get;
+    rpush   = fbDB.push;  ronVal= fbDB.onValue; rrem  = fbDB.remove;
+    rupd    = fbDB.update; rDisc = fbDB.onDisconnect;
+    // Thử auto-login từ session đã lưu
+    const saved = localStorage.getItem('pz_session');
+    if(saved) {
+      try {
+        const { username } = JSON.parse(saved);
+        const snap = await rget(rref(DB, 'users/' + username));
+        if(snap.exists()) {
+          const userData = snap.val();
+          await rupd(rref(DB, 'users/' + username), {online: true});
+          login(userData);
+          return; // không hiện authScreen
+        }
+      } catch(e) { localStorage.removeItem('pz_session'); }
+    }
+    el.classList.add('active');
+  } catch(e) {
+    el.innerHTML = `<div style="margin:auto;padding:24px;max-width:400px;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:12px">🔥</div>
+      <div style="font-size:1rem;font-weight:800;color:var(--rd);margin-bottom:8px">Lỗi kết nối Firebase</div>
+      <div style="font-size:.82rem;color:var(--mu);line-height:1.6;background:var(--c2);border-radius:10px;padding:12px">${e.message}</div>
+      <div style="font-size:.78rem;color:var(--mu);margin-top:12px">→ Kiểm tra lại <b>FIREBASE_CONFIG</b> trong file HTML</div>
+    </div>`;
+    el.classList.add('active');
+  }
+})();
+
+// =====================================================
+// HELPERS
+// =====================================================
+function db(path) { return rref(DB, path); }
+
+const GIFTS = [
+  {id:'rose',e:'🌹',name:'Hoa hồng',cost:10,xp:5},
+  {id:'heart',e:'💖',name:'Trái tim',cost:20,xp:10},
+  {id:'ring',e:'💍',name:'Nhẫn',cost:50,xp:25},
+  {id:'crown',e:'👑',name:'Vương miện',cost:100,xp:50},
+  {id:'diamond',e:'💎',name:'Kim cương',cost:200,xp:100}
+];
+const LXP = [0,100,250,500,1000,2000,3500,5500,8000,12000,17000];
+function lv(xp) { for(let i=LXP.length-1;i>=0;i--) if(xp>=LXP[i]) return i+1; return 1; }
+function xpnxt(xp) {
+  const l=lv(xp);
+  if(l>=LXP.length) return {cur:xp,max:xp,p:100};
+  return {cur:xp-LXP[l-1], max:LXP[l]-LXP[l-1], p:~~((xp-LXP[l-1])/(LXP[l]-LXP[l-1])*100)};
+}
+function av(u) {
+  const url = (u && u.avatar) ? String(u.avatar).trim() : '';
+  if(url && (url.startsWith('http://') || url.startsWith('https://'))) return url;
+  return 'https://ui-avatars.com/api/?name='+encodeURIComponent((u&&u.name)||'U')+'&background=random&color=fff&size=128';
+}
+function imgErr(el, name) {
+  el.onerror = null;
+  el.src = 'https://ui-avatars.com/api/?name='+encodeURIComponent(name||'U')+'&background=random&color=fff&size=128';
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function tf(ts) {
+  if(!ts) return '';
+  const d = Date.now()-ts;
+  if(d<60000) return 'Vừa xong';
+  if(d<3600000) return ~~(d/60000)+'p trước';
+  if(d<86400000) return ~~(d/3600000)+'h trước';
+  return new Date(ts).toLocaleDateString('vi');
+}
+function fmtS(s) { return `${String(~~(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), dur);
+}
+function op(id) { document.getElementById(id).classList.remove('hidden'); }
+function cl(id) { document.getElementById(id).classList.add('hidden'); }
+function setBdg(id, n) { const e=document.getElementById(id); if(!e) return; e.textContent=n; e.classList.toggle('hidden',n===0); }
+
+document.querySelectorAll('.ov').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.add('hidden'); }));
+
+// =====================================================
+// STATE
+// =====================================================
+let ME = null;
+let curRoom = null, curDMF = null, curTab = 'home';
+let isHang = false, hangTm = null, hangS = 0;
+let pendGift = null;
+// listener unsubscribes
+let Ls = {};
+function killL(...ks) { ks.forEach(k => { if(Ls[k]) { Ls[k](); Ls[k]=null; } }); }
+function killAll() { Object.keys(Ls).forEach(k => { if(Ls[k]){Ls[k]();Ls[k]=null;} }); }
+
+async function reloadMe() {
+  const s = await rget(db(`users/${ME.username}`));
+  if(s.exists()) ME = {...s.val()};
+  navUpd();
+}
+function navUpd() {
+  document.getElementById('navKC').textContent = (ME.kc||0)+' KC';
+  const navImg = document.getElementById('navAv');
+  const newSrc = av(ME);
+  if(navImg.src !== newSrc) navImg.src = newSrc;
+  navImg.onerror = () => imgErr(navImg, ME.name);
+}
+
+// =====================================================
+// AUTH
+// =====================================================
+function swTab(t) {
+  document.getElementById('tl').classList.toggle('on', t==='l');
+  document.getElementById('tr').classList.toggle('on', t==='r');
+  document.getElementById('lF').classList.toggle('hidden', t!=='l');
+  document.getElementById('rF').classList.toggle('hidden', t!=='r');
+}
+window.swTab = swTab;
+
+async function doLogin() {
+  const u = document.getElementById('lu').value.trim().toLowerCase();
+  const p = document.getElementById('lp').value;
+  if(!u||!p) return toast('Nhập tên đăng nhập và mật khẩu!');
+  try {
+    const s = await rget(db(`users/${u}`));
+    if(!s.exists()) return toast('Tài khoản không tồn tại!');
+    const d = s.val();
+    if(d.password !== p) return toast('Sai mật khẩu!');
+    await rupd(db(`users/${u}`), {online:true});
+    login(d);
+  } catch(e) { toast('Lỗi: '+e.message); }
+}
+window.doLogin = doLogin;
+
+async function doReg() {
+  const u = document.getElementById('ru').value.trim().toLowerCase();
+  const p = document.getElementById('rp').value;
+  const n = document.getElementById('rn').value.trim();
+  const a = parseInt(document.getElementById('ra').value)||18;
+  const g = document.getElementById('rg').value;
+  const b = document.getElementById('rb').value.trim();
+  const av2 = document.getElementById('rv').value.trim();
+  if(!u||!p||!n) return toast('Cần điền: username, mật khẩu, tên!');
+  if(!/^[a-z0-9_]{3,20}$/.test(u)) return toast('Username: 3-20 ký tự, chữ thường/số/_');
+  if(p.length<6) return toast('Mật khẩu ít nhất 6 ký tự!');
+  try {
+    const s = await rget(db(`users/${u}`));
+    if(s.exists()) return toast('Tên đăng nhập đã tồn tại!');
+    const d = {username:u,password:p,name:n,age:a,gender:g,bio:b,avatar:av2,kc:100,xp:0,beans:0,createdAt:Date.now(),online:true};
+    await rset(db(`users/${u}`), d);
+    toast('✅ Đăng ký thành công! Nhận 100 KC khởi đầu!');
+    login(d);
+  } catch(e) { toast('Lỗi: '+e.message); }
+}
+window.doReg = doReg;
+
+function login(d) {
+  ME = d;
+  // Lưu session để duy trì đăng nhập
+  localStorage.setItem('pz_session', JSON.stringify({ username: d.username }));
+  document.getElementById('authScreen').classList.remove('active');
+  document.getElementById('mainScreen').classList.add('active');
+  navUpd();
+  rDisc(db(`users/${ME.username}/online`)).set(false);
+  setupNotifL();
+  setupFrL();
+  swMain('home');
+}
+
+async function logout() {
+  if(curRoom) await leaveRoom();
+  if(ME) await rupd(db(`users/${ME.username}`), {online:false});
+  killAll(); stopHang();
+  ME = null;
+  // Xóa session đã lưu
+  localStorage.removeItem('pz_session');
+  document.getElementById('mainScreen').classList.remove('active');
+  document.getElementById('authScreen').classList.add('active');
+  document.getElementById('lu').value='';
+  document.getElementById('lp').value='';
+  toast('👋 Đã đăng xuất!');
+}
+window.logout = logout;
+
+// =====================================================
+// MAIN NAV
+// =====================================================
+function swMain(tab) {
+  curTab = tab;
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  const ni = document.getElementById('ni_'+tab);
+  if(ni) ni.classList.add('on');
+  if(tab!=='home') killL('hu','hr');
+  if(tab!=='rooms') killL('rt');
+  const el = document.getElementById('cnt');
+  if(tab==='home') renderHome(el);
+  else if(tab==='rooms') renderRooms(el);
+  else if(tab==='friends') renderFriends(el);
+  else if(tab==='notif') renderNotif(el);
+  else if(tab==='profile') renderProfile(el);
+}
+window.swMain = swMain;
+
+// =====================================================
+// HOME — REALTIME LISTENERS
+// =====================================================
+function renderHome(el) {
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--mu)">⏳ Đang tải...</div>';
+  killL('hu','hr');
+  let allU = {}, allR = {}, loadU = false, loadR = false;
+
+  function build() {
+    if(!loadU || !loadR) return;
+    const myF = ME.friends||{};
+    const mySent = ME.sentFriendReqs||{};
+    const myRecv = ME.friendReqs||{};
+    const sugg = Object.values(allU).filter(u => u.username!==ME.username && !myF[u.username] && !mySent[u.username]);
+    const rooms = Object.entries(allR).filter(([id,r]) => r&&r.active);
+
+    let h = '';
+    if(isHang) {
+      h += `<div class="hbar"><span>☕</span><div style="flex:1"><b style="font-size:.81rem">Đang treo máy</b><div style="font-size:.66rem;color:var(--mu)">+KC mỗi 5 phút</div></div><span class="htimer" id="htd">${fmtS(300-hangS)}</span></div>`;
+    }
+    h += `<div class="card"><div class="stitle">💡 Gợi ý kết bạn</div>`;
+    if(!sugg.length) {
+      h += `<div style="color:var(--mu);font-size:.81rem;text-align:center;padding:10px">Không có gợi ý mới</div>`;
+    } else {
+      h += `<div class="sr">`;
+      sugg.slice(0,10).forEach(u => {
+        const hasReq = myRecv[u.username];
+        h += `<div class="sc" onclick="viewP('${u.username}')">
+          <img class="sav" src="${av(u)}" onerror="this.src='https://ui-avatars.com/api/?name=${esc(u.name)}'">
+          <div class="sname">${esc(u.name)}</div>
+          <div class="slv">⭐Lv.${lv(u.xp||0)}</div>
+          <div style="font-size:.63rem;color:var(--mu)">${esc(u.gender||'')}</div>
+          <div class="sbtns">
+            ${hasReq
+              ? `<button style="background:var(--gn);color:#fff;border:none;border-radius:6px;padding:4px 5px;cursor:pointer;font-size:.63rem;font-weight:700;font-family:inherit" onclick="event.stopPropagation();accFr('${u.username}')">✓</button>
+                 <button style="background:var(--rd);color:#fff;border:none;border-radius:6px;padding:4px 5px;cursor:pointer;font-size:.63rem;font-weight:700;font-family:inherit" onclick="event.stopPropagation();rejFr('${u.username}')">✕</button>`
+              : `<button style="background:var(--p);color:#fff;border:none;border-radius:6px;padding:4px 0;cursor:pointer;font-size:.63rem;font-weight:700;font-family:inherit;flex:1" onclick="event.stopPropagation();sendFr('${u.username}')">+ Kết bạn</button>`
+            }
+          </div>
+        </div>`;
+      });
+      h += `</div>`;
+    }
+    h += `</div>`;
+    h += `<div class="card"><div class="stitle">🎮 Phòng đang mở (${rooms.length})</div>`;
+    if(!rooms.length) {
+      h += `<div style="color:var(--mu);font-size:.81rem;text-align:center;padding:10px">Chưa có phòng nào</div>`;
+    } else {
+      rooms.slice(0,8).forEach(([id,r]) => {
+        const cnt = Object.keys(r.members||{}).length;
+        h += `<div class="rc" onclick="joinRoom('${id}')">
+          <div class="ric">🎉</div>
+          <div class="rinf"><div class="rname">${esc(r.name||'Phòng vui')}</div><div class="rmeta">Chủ: ${esc(r.hostName||r.host)} · ${cnt} người</div></div>
+          <div class="rcnt">${cnt}/8</div>
+        </div>`;
+      });
+    }
+    h += `</div>`;
+    el.innerHTML = h;
+  }
+
+  // Realtime users
+  Ls.hu = ronVal(db('users'), snap => {
+    allU = snap.exists() ? snap.val() : {};
+    if(allU[ME.username]) {
+      const f = allU[ME.username];
+      ME.friends = f.friends||{}; ME.friendReqs = f.friendReqs||{};
+      ME.sentFriendReqs = f.sentFriendReqs||{}; ME.kc = f.kc||0; ME.xp = f.xp||0; ME.beans = f.beans||0;
+      navUpd();
+    }
+    loadU = true; build();
+  });
+
+  // Realtime rooms
+  Ls.hr = ronVal(db('rooms'), snap => {
+    allR = snap.exists() ? snap.val() : {};
+    loadR = true; build();
+  });
+}
+
+// =====================================================
+// ROOMS TAB — REALTIME
+// =====================================================
+function renderRooms(el) {
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--mu)">⏳</div>';
+  killL('rt');
+  Ls.rt = ronVal(db('rooms'), async snap => {
+    await reloadMe();
+    const all = snap.exists() ? snap.val() : {};
+    const myId = ME.myRoom;
+    let h = '';
+    if(myId && all[myId]) {
+      const r = all[myId];
+      h += `<div class="card" style="border-color:var(--p)">
+        <div class="stitle">🏠 Phòng của tôi</div>
+        <div class="rc" onclick="joinRoom('${myId}')" style="border:1.5px solid var(--p)">
+          <div class="ric" style="background:linear-gradient(135deg,var(--a),#ff9800)">👑</div>
+          <div class="rinf"><div class="rname">${esc(r.name)}</div><div class="rmeta">${Object.keys(r.members||{}).length} người trong phòng</div></div>
+          <div class="rcnt" style="background:var(--gn);color:#000">Vào →</div>
+        </div></div>`;
+    } else {
+      h += `<div class="card"><button class="btn btn-p" onclick="op('ovCR');document.getElementById('crN').value=''">🎮 Tạo phòng mới</button></div>`;
+    }
+    h += `<div class="card"><div class="stitle">🌐 Tất cả phòng online</div>`;
+    const rs = Object.entries(all).filter(([id,r]) => r&&r.active);
+    if(!rs.length) { h += `<div style="color:var(--mu);font-size:.81rem;text-align:center;padding:10px">Chưa có phòng nào</div>`; }
+    else rs.forEach(([id,r]) => {
+      const cnt = Object.keys(r.members||{}).length;
+      h += `<div class="rc" onclick="joinRoom('${id}')">
+        <div class="ric">🎉</div>
+        <div class="rinf"><div class="rname">${esc(r.name||'Phòng vui')}</div><div class="rmeta">Chủ: ${esc(r.hostName||r.host)} · ${cnt} người</div></div>
+        <div class="rcnt">${cnt}</div>
+      </div>`;
+    });
+    h += `</div>`;
+    el.innerHTML = h;
+  });
+}
+
+async function doCreateRoom() {
+  const name = document.getElementById('crN').value.trim();
+  if(!name) return toast('Nhập tên phòng!');
+  await reloadMe();
+  if(ME.myRoom) return toast('Bạn đã có phòng! Xóa phòng cũ trước.');
+  const rr = rpush(db('rooms'));
+  const id = rr.key;
+  await rset(rr, {id,name,host:ME.username,hostName:ME.name,active:true,createdAt:Date.now(),members:{},seats:{},music:{url:'',name:'',playing:false}});
+  await rupd(db(`users/${ME.username}`), {myRoom:id});
+  ME.myRoom = id;
+  cl('ovCR');
+  toast('🎉 Đã tạo phòng!');
+  joinRoom(id);
+}
+window.doCreateRoom = doCreateRoom;
+
+// =====================================================
+// ROOM — JOIN / LISTEN / LEAVE
+// =====================================================
+async function joinRoom(rid) {
+  try {
+    const s = await rget(db(`rooms/${rid}`));
+    if(!s.exists()||!s.val().active) return toast('Phòng không tồn tại!');
+    curRoom = rid;
+    await rset(db(`rooms/${rid}/members/${ME.username}`), {name:ME.name,avatar:ME.avatar||'',gender:ME.gender||'',joinedAt:Date.now()});
+    document.getElementById('mainScreen').classList.remove('active');
+    document.getElementById('roomScreen').classList.add('active');
+    killL('room');
+    startRoomL(rid);
+  } catch(e) { toast('Lỗi vào phòng: '+e.message); }
+}
+window.joinRoom = joinRoom;
+
+function startRoomL(rid) {
+  Ls.room = ronVal(db(`rooms/${rid}`), snap => {
+    if(!snap.exists()) { forceLeave(); toast('Phòng đã bị xóa!'); return; }
+    const r = snap.val();
+    if(r.kicked && r.kicked[ME.username]) { forceLeave(); toast('Bạn đã bị kick!'); return; }
+    const isHost = r.host === ME.username;
+    document.getElementById('rtName').textContent = r.name||'Phòng';
+    document.getElementById('editRBtn').classList.toggle('hidden', !isHost);
+    document.getElementById('delRBtn').classList.toggle('hidden', !isHost);
+    document.getElementById('musicBtn').classList.toggle('hidden', !isHost);
+    const tot = Object.keys(r.members||{}).length;
+    const seated = Object.keys(r.seats||{}).length;
+    document.getElementById('rtMeta').textContent = `${tot} người · ${seated} ngồi ghế`;
+    drawSeats(r);
+    drawStanding(r);
+    syncMusic(r);
+    drawRoomChat(r);
+  });
+}
+
+function drawSeats(r) {
+  const seats = r.seats||{};
+  const seatedU = {}; // seat key -> username
+  Object.entries(seats).forEach(([u,sk]) => seatedU[sk] = u);
+
+  let top='', bot='';
+  for(let i=1; i<=8; i++) {
+    const sk = 's'+i;
+    const occ = seatedU[sk];
+    const isMe = occ===ME.username;
+    const isHost = r.host===ME.username;
+    const mem = occ && r.members && r.members[occ];
+    const avUrl = av({avatar: mem&&mem.avatar, name: mem&&mem.name||occ});
+    const paired = occ && r.couples && Object.values(r.couples).some(v=>v&&(v.a===occ||v.b===occ));
+    const cls = ['seat', occ?'occ':'', isMe?'me':'', i===1?'hs':''].filter(Boolean).join(' ');
+
+    let inner = `<div class="snum">S${i}</div>`;
+    if(i===1) inner += `<div class="crown">👑</div>`;
+    if(occ) {
+      inner += `<img class="sav2" src="${avUrl}" onerror="this.src='https://ui-avatars.com/api/?name=${esc(occ)}'">
+        <div class="sn">${esc((mem&&mem.name)||occ)}</div>
+        ${paired?'<div class="plbl">💑</div>':''}`;
+      if(isHost && occ!==ME.username) {
+        inner += `<button style="font-size:.5rem;background:var(--rd);color:#fff;border:none;border-radius:5px;padding:1px 4px;cursor:pointer;margin-top:1px" onclick="event.stopPropagation();kickU('${occ}')">Kick</button>`;
+      }
+    } else {
+      inner += `<div class="sdef">➕</div><div class="sn" style="color:var(--mu)">Trống</div>`;
+    }
+    const cell = `<div class="${cls}" onclick="seatCk('${sk}','${occ||''}','${r.host}')">${inner}</div>`;
+    if(i<=4) top+=cell; else bot+=cell;
+  }
+  document.getElementById('sTop').innerHTML = top;
+  document.getElementById('sBot').innerHTML = bot;
+}
+
+function drawStanding(r) {
+  const seated = new Set(Object.keys(r.seats||{}));
+  const standing = Object.entries(r.members||{}).filter(([u]) => !seated.has(u));
+  const el = document.getElementById('standL');
+  if(!standing.length) { el.innerHTML='<span style="color:var(--mu);font-size:.71rem">Không có ai đứng</span>'; return; }
+  el.innerHTML = standing.map(([u,d]) => `<div class="su" onclick="viewP('${u}')">
+    <img class="suav" src="${av({avatar:d.avatar,name:d.name||u})}" onerror="this.src='https://ui-avatars.com/api/?name=${esc(d.name||u)}'">
+    <span class="sun">${esc(d.name||u)}</span>
+  </div>`).join('');
+}
+
+function syncMusic(r) {
+  const m = r.music||{};
+  document.getElementById('mtit').textContent = m.name||'Chưa phát nhạc';
+  document.getElementById('mstat').textContent = m.playing ? '▶ Đang phát' : 'Phòng yên tĩnh';
+  const audio = document.getElementById('rAudio');
+  if(m.playing && m.url) {
+    if(audio.src !== m.url) { audio.src = m.url; audio.play().catch(()=>{}); }
+  } else { if(!audio.paused) audio.pause(); }
+}
+
+function drawRoomChat(r) {
+  const el = document.getElementById('rca');
+  if(!el) return;
+  const msgs = r.chat ? Object.values(r.chat).sort((a,b)=>a.ts-b.ts) : [];
+  const atBot = el.scrollHeight - el.scrollTop <= el.clientHeight + 60;
+  el.innerHTML = msgs.map(m => {
+    const isMe = m.uid===ME.username;
+    const avUrl = av({avatar:m.avatar, name:m.name||m.uid});
+    let body = '';
+    if(m.type==='img') {
+      body = `<img class="msg-img" src="${m.url}" onclick="showImgFull('${m.url}')" loading="lazy">`;
+    } else if(m.type==='voice') {
+      body = `<div class="vmsg" onclick="playVoice('${m.url}',this)">
+        <button class="vplay">▶</button>
+        <div class="vwave"><div></div></div>
+        <span class="vdur">${m.dur||'0:00'}</span>
+      </div>`;
+    } else {
+      body = `<div class="ctxt">${esc(m.text||'')}</div>`;
+    }
+    return `<div class="cmsg${isMe?' me':''}">
+      <img class="cmav" src="${avUrl}" onerror="this.src='https://ui-avatars.com/api/?name=${esc(m.name||m.uid)}'">
+      <div class="cbbl">${!isMe?`<div class="cname">${esc(m.name||m.uid)}</div>`:''}${body}</div>
+    </div>`;
+  }).join('');
+  if(atBot) el.scrollTop = el.scrollHeight;
+}
+
+async function seatCk(sk, occ, host) {
+  if(!curRoom) return;
+  if(occ && occ!==ME.username) { viewP(occ); return; }
+  if(sk==='s1' && host!==ME.username) return toast('Ghế 1 chỉ dành cho chủ phòng!');
+  const s = await rget(db(`rooms/${curRoom}/seats`));
+  const seats = s.val()||{};
+  if(seats[ME.username]===sk) {
+    await rrem(db(`rooms/${curRoom}/seats/${ME.username}`));
+    toast('Đã rời ghế');
+  } else if(!occ) {
+    await rset(db(`rooms/${curRoom}/seats/${ME.username}`), sk);
+    toast('✅ Ngồi ghế '+sk);
+  }
+}
+window.seatCk = seatCk;
+
+async function kickU(uid) {
+  if(!curRoom) return;
+  await rset(db(`rooms/${curRoom}/kicked/${uid}`), true);
+  await rrem(db(`rooms/${curRoom}/seats/${uid}`));
+  await rrem(db(`rooms/${curRoom}/members/${uid}`));
+  setTimeout(() => rrem(db(`rooms/${curRoom}/kicked/${uid}`)), 5000);
+  toast('👢 Đã kick '+uid+'!');
+}
+window.kickU = kickU;
+
+async function leaveRoom() {
+  if(!curRoom) return;
+  killL('room');
+  try {
+    await rrem(db(`rooms/${curRoom}/chat`));
+    await rrem(db(`rooms/${curRoom}/seats/${ME.username}`));
+    await rrem(db(`rooms/${curRoom}/members/${ME.username}`));
+    await rrem(db(`rooms/${curRoom}/voice/${ME.username}`));
+    // Dọn webrtc signaling
+    await rrem(db(`rooms/${curRoom}/webrtc/${ME.username}`));
+  } catch(e) {}
+  stopRoomMic();
+  document.getElementById('rAudio').pause();
+  document.getElementById('rAudio').src = '';
+  stopHang();
+  curRoom = null;
+  document.getElementById('roomScreen').classList.remove('active');
+  document.getElementById('mainScreen').classList.add('active');
+  swMain('rooms');
+}
+window.leaveRoom = leaveRoom;
+
+function forceLeave() {
+  killL('room'); curRoom = null;
+  stopRoomMic();
+  document.getElementById('rAudio').pause();
+  document.getElementById('rAudio').src = '';
+  stopHang();
+  document.getElementById('roomScreen').classList.remove('active');
+  document.getElementById('mainScreen').classList.add('active');
+}
+
+async function doDelRoom() {
+  if(!curRoom) return;
+  const s = await rget(db(`rooms/${curRoom}`));
+  if(!s.exists() || s.val().host!==ME.username) return toast('Chỉ chủ phòng mới xóa được!');
+  await rrem(db(`rooms/${curRoom}`));
+  await rupd(db(`users/${ME.username}`), {myRoom:null});
+  ME.myRoom = null;
+  forceLeave();
+  toast('🗑️ Đã xóa phòng!');
+}
+window.doDelRoom = doDelRoom;
+
+function showEditRoom() {
+  rget(db(`rooms/${curRoom}`)).then(s => {
+    if(s.exists()) document.getElementById('erN').value = s.val().name||'';
+    op('ovER');
+  });
+}
+window.showEditRoom = showEditRoom;
+
+async function saveRoom() {
+  const name = document.getElementById('erN').value.trim();
+  if(!name) return toast('Nhập tên phòng!');
+  await rupd(db(`rooms/${curRoom}`), {name});
+  cl('ovER'); toast('✅ Đã sửa tên phòng!');
+}
+window.saveRoom = saveRoom;
+
+// =====================================================
+// ROOM CHAT
+// =====================================================
+async function sendRC() {
+  const inp = document.getElementById('rci');
+  const txt = inp.value.trim();
+  if(!txt||!curRoom) return;
+  inp.value = '';
+  await rpush(db(`rooms/${curRoom}/chat`), {uid:ME.username,name:ME.name,avatar:ME.avatar||'',text:txt,ts:Date.now()});
+}
+window.sendRC = sendRC;
+
+// =====================================================
+// MUSIC
+// =====================================================
+async function showMusicMod() {
+  const s = await rget(db(`rooms/${curRoom}`));
+  if(!s.exists()||s.val().host!==ME.username) return toast('Chỉ chủ phòng phát nhạc!');
+  const m = s.val().music||{};
+  document.getElementById('murl').value = m.url||'';
+  document.getElementById('mname').value = m.name||'';
+  op('ovM');
+}
+window.showMusicMod = showMusicMod;
+
+async function setMusic() {
+  const url = document.getElementById('murl').value.trim();
+  const name = document.getElementById('mname').value.trim()||'Bài hát';
+  if(!url) return toast('Nhập link nhạc!');
+  await rupd(db(`rooms/${curRoom}/music`), {url,name,playing:true});
+  cl('ovM'); toast('🎵 Đang phát nhạc!');
+}
+window.setMusic = setMusic;
+
+async function stopMusic() {
+  await rupd(db(`rooms/${curRoom}/music`), {url:'',name:'',playing:false});
+  document.getElementById('rAudio').pause();
+  document.getElementById('rAudio').src = '';
+  cl('ovM'); toast('⏹ Đã dừng nhạc');
+}
+window.stopMusic = stopMusic;
+
+// =====================================================
+// SEAT MODAL
+// =====================================================
+async function showSeatMod() {
+  const s = await rget(db(`rooms/${curRoom}`));
+  if(!s.exists()) return;
+  const r = s.val();
+  const seats = r.seats||{};
+  const isHost = r.host===ME.username;
+  const mySeat = seats[ME.username];
+  let h = '';
+  if(mySeat) h += `<button class="btn btn-d" style="margin-bottom:9px" onclick="doLeaveSeat()">🚶 Rời ghế ${mySeat}</button>`;
+  h += `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">`;
+  const seatMap = {};
+  Object.entries(seats).forEach(([u,sk]) => seatMap[sk]=u);
+  for(let i=1; i<=8; i++) {
+    const sk='s'+i, occ=seatMap[sk];
+    const isMine = occ===ME.username;
+    const canSit = !occ && (i!==1||isHost);
+    const col = isMine?'var(--a)':canSit?'var(--gn)':'var(--br)';
+    h += `<button style="padding:8px 2px;border-radius:8px;border:1.5px solid ${col};background:${isMine?'rgba(255,204,0,.1)':canSit?'rgba(0,224,150,.05)':'var(--c2)'};color:${canSit||isMine?'var(--tx)':'var(--mu)'};cursor:${canSit?'pointer':'default'};font-family:inherit;font-size:.76rem;font-weight:700"
+      onclick="${canSit?`doSit('${sk}')`:''}">${i===1?'👑':''}S${i}<br><span style="font-size:.6rem">${isMine?'(Bạn)':occ?esc((occ).slice(0,8)):canSit?'Trống':'Bận'}</span></button>`;
+  }
+  h += `</div>`;
+  document.getElementById('seatC').innerHTML = h;
+  op('ovSeat');
+}
+window.showSeatMod = showSeatMod;
+
+async function doSit(sk) {
+  const s = await rget(db(`rooms/${curRoom}`));
+  if(sk==='s1' && s.val().host!==ME.username) return toast('Ghế 1 chỉ dành cho chủ phòng!');
+  await rset(db(`rooms/${curRoom}/seats/${ME.username}`), sk);
+  cl('ovSeat'); toast('✅ Ngồi ghế '+sk);
+}
+window.doSit = doSit;
+
+async function doLeaveSeat() {
+  await rrem(db(`rooms/${curRoom}/seats/${ME.username}`));
+  cl('ovSeat'); toast('🚶 Đã rời ghế');
+}
+window.doLeaveSeat = doLeaveSeat;
+
+// =====================================================
+// GIFT
+// =====================================================
+async function showGift() {
+  const s = await rget(db(`rooms/${curRoom}`));
+  if(!s.exists()) return;
+  const members = Object.entries(s.val().members||{});
+  let h = `<div class="gg">`;
+  GIFTS.forEach(g => h+=`<div class="git" id="gi_${g.id}" onclick="selG('${g.id}')"><div class="gem">${g.e}</div><div class="gn">${g.name}</div><div class="gc">${g.cost}KC</div></div>`);
+  h += `</div><div class="fg"><label>Tặng cho</label><select id="gTg">`;
+  members.forEach(([u,d]) => h+=`<option value="${u}">${esc(d.name||u)}${u===ME.username?' (bạn)':''}</option>`);
+  h += `</select></div><button class="btn btn-p" onclick="doGift()">🎁 Tặng ngay</button>`;
+  document.getElementById('giftC').innerHTML = h;
+  pendGift = null;
+  op('ovGift');
+}
+window.showGift = showGift;
+
+function selG(id) {
+  pendGift = id;
+  document.querySelectorAll('.git').forEach(e => e.classList.remove('sel'));
+  const el = document.getElementById('gi_'+id);
+  if(el) el.classList.add('sel');
+}
+window.selG = selG;
+
+async function doGift() {
+  if(!pendGift) return toast('Chọn quà trước!');
+  const g = GIFTS.find(x => x.id===pendGift);
+  const target = document.getElementById('gTg').value;
+  await reloadMe();
+  if((ME.kc||0) < g.cost) return toast(`Không đủ KC! Cần ${g.cost} KC`);
+  await rupd(db(`users/${ME.username}`), {kc:ME.kc-g.cost, xp:(ME.xp||0)+~~(g.xp/2)});
+  ME.kc -= g.cost;
+  const rs = await rget(db(`users/${target}`));
+  if(rs.exists()) {
+    const rv = rs.val();
+    await rupd(db(`users/${target}`), {beans:(rv.beans||0)+g.xp, xp:(rv.xp||0)+g.xp});
+    await rpush(db(`users/${target}/notifications`), {type:'gift',from:ME.username,fromName:ME.name,gift:g.e+' '+g.name,ts:Date.now(),read:false});
+  }
+  await rpush(db(`rooms/${curRoom}/chat`), {uid:'system',name:'🎁 Hệ thống',avatar:'',text:`${ME.name} tặng ${g.e} ${g.name} cho ${target}!`,ts:Date.now()});
+  navUpd(); cl('ovGift');
+  toast(`🎁 Đã tặng ${g.e} cho ${target}!`);
+}
+window.doGift = doGift;
+
+// =====================================================
+// COUPLE
+// =====================================================
+async function showCouple() {
+  await reloadMe();
+  const s = await rget(db(`rooms/${curRoom}`));
+  if(!s.exists()) return;
+  const r = s.val();
+  const members = Object.entries(r.members||{}).filter(([u])=>u!==ME.username);
+  const myTotal = Object.keys(ME.couples||{}).length;
+  const rCps = r.couples||{};
+  const myPair = Object.entries(rCps).find(([k,v])=>v&&(v.a===ME.username||v.b===ME.username));
+  const pending = Object.entries(r.coupleReqs||{}).filter(([k,v])=>v&&v.to===ME.username&&v.status==='pending');
+
+  let h = '';
+  if(myTotal>=5) h += `<div style="background:rgba(255,77,109,.08);border:1px solid var(--rd);border-radius:8px;padding:8px;margin-bottom:8px;font-size:.81rem;text-align:center">⚠️ Đã đạt tối đa 5 cặp đôi</div>`;
+  if(myPair) {
+    const pv = myPair[1];
+    const partner = pv.a===ME.username?pv.b:pv.a;
+    h += `<div class="creq"><div style="font-weight:700;margin-bottom:5px">💑 Cặp đôi trong phòng: <b>${esc(partner)}</b></div>
+      <button class="btn btn-d btn-s" onclick="cancelCp('${myPair[0]}')">💔 Hủy cặp</button></div>`;
+  } else if(myTotal<5) {
+    const avail = members.filter(([u])=>!Object.values(rCps).some(v=>v&&(v.a===u||v.b===u)));
+    if(avail.length) {
+      h += `<div class="fg"><label>Chọn người ghép cặp</label><select id="cpTg">`;
+      avail.forEach(([u,d]) => h+=`<option value="${u}">${esc(d.name||u)}</option>`);
+      h += `</select></div><button class="btn btn-p" onclick="sendCpReq()">💑 Gửi yêu cầu ghép cặp</button>`;
+    } else h += `<div style="color:var(--mu);text-align:center;padding:10px;font-size:.81rem">Không có ai để ghép cặp</div>`;
+  }
+  if(pending.length) {
+    h += `<div style="margin-top:11px"><div class="stitle">📩 Yêu cầu ghép cặp</div>`;
+    pending.forEach(([k,v]) => {
+      h += `<div class="creq"><div style="margin-bottom:6px"><b>${esc(v.fromName)}</b> muốn ghép cặp với bạn</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-g btn-s" onclick="accCp('${k}','${v.from}')">✓ Đồng ý</button>
+          <button class="btn btn-d btn-s" onclick="rejCp('${k}')">✕ Từ chối</button>
+        </div></div>`;
+    });
+    h += `</div>`;
+  }
+  const allMyCps = ME.couples||{};
+  if(Object.keys(allMyCps).length) {
+    h += `<div style="margin-top:11px"><div class="stitle">💑 Tất cả cặp đôi (${Object.keys(allMyCps).length}/5)</div>`;
+    Object.keys(allMyCps).forEach(p => {
+      h += `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--br)">
+        <span>💑</span><span style="font-weight:700;flex:1">${esc(p)}</span>
+        <button class="btn btn-d btn-s" onclick="rmCpGlobal('${p}')">💔 Hủy</button>
+      </div>`;
+    });
+    h += `</div>`;
+  }
+  document.getElementById('cpC').innerHTML = h;
+  op('ovCp');
+}
+window.showCouple = showCouple;
+
+async function sendCpReq() {
+  const target = document.getElementById('cpTg')?.value;
+  if(!target) return toast('Chọn người!');
+  await reloadMe();
+  if(Object.keys(ME.couples||{}).length>=5) return toast('Đã đạt tối đa 5 cặp!');
+  const rr = rpush(db(`rooms/${curRoom}/coupleReqs`));
+  await rset(rr, {from:ME.username,fromName:ME.name,to:target,status:'pending',ts:Date.now()});
+  await rpush(db(`users/${target}/notifications`), {type:'coupleReq',from:ME.username,fromName:ME.name,ts:Date.now(),read:false});
+  cl('ovCp'); toast('💑 Đã gửi yêu cầu ghép cặp!');
+}
+window.sendCpReq = sendCpReq;
+
+async function accCp(reqK, fromUser) {
+  await reloadMe();
+  if(Object.keys(ME.couples||{}).length>=5) return toast('Bạn đã có 5 cặp!');
+  const pk = rpush(db(`rooms/${curRoom}/couples`)).key;
+  await rset(db(`rooms/${curRoom}/couples/${pk}`), {a:fromUser,b:ME.username,ts:Date.now()});
+  await rupd(db(`rooms/${curRoom}/coupleReqs/${reqK}`), {status:'accepted'});
+  await rupd(db(`users/${ME.username}/couples`), {[fromUser]:true});
+  await rupd(db(`users/${fromUser}/couples`), {[ME.username]:true});
+  await rpush(db(`rooms/${curRoom}/chat`), {uid:'system',name:'🎉 Hệ thống',avatar:'',text:`💑 ${ME.name} và ${fromUser} đã thành cặp đôi!`,ts:Date.now()});
+  cl('ovCp'); toast('💑 Ghép cặp thành công!');
+}
+window.accCp = accCp;
+
+async function rejCp(reqK) {
+  await rupd(db(`rooms/${curRoom}/coupleReqs/${reqK}`), {status:'rejected'});
+  cl('ovCp'); toast('❌ Đã từ chối');
+}
+window.rejCp = rejCp;
+
+async function cancelCp(pairK) {
+  const s = await rget(db(`rooms/${curRoom}/couples/${pairK}`));
+  if(s.exists()) {
+    const v = s.val();
+    await rrem(db(`users/${v.a}/couples/${v.b}`));
+    await rrem(db(`users/${v.b}/couples/${v.a}`));
+  }
+  await rrem(db(`rooms/${curRoom}/couples/${pairK}`));
+  cl('ovCp'); toast('💔 Đã hủy cặp');
+}
+window.cancelCp = cancelCp;
+
+async function rmCpGlobal(partner) {
+  await rrem(db(`users/${ME.username}/couples/${partner}`));
+  await rrem(db(`users/${partner}/couples/${ME.username}`));
+  await reloadMe();
+  showCouple();
+  toast('💔 Đã hủy cặp đôi với '+partner);
+}
+window.rmCpGlobal = rmCpGlobal;
+
+// =====================================================
+// HANG
+// =====================================================
+function toggleHang() {
+  if(isHang) { stopHang(); toast('☕ Đã tắt treo máy'); }
+  else startHang();
+}
+window.toggleHang = toggleHang;
+
+function startHang() {
+  isHang = true; hangS = 0;
+  document.getElementById('hic').textContent='⏳';
+  document.getElementById('hlb').textContent='Đang treo';
+  hangTm = setInterval(async () => {
+    hangS = (hangS+1)%300;
+    const td = document.getElementById('htd');
+    if(td) td.textContent = fmtS(300-hangS);
+    if(hangS===0) {
+      await reloadMe();
+      let bonus = 10;
+      if(curRoom) {
+        const cs = await rget(db(`rooms/${curRoom}/couples`));
+        if(cs.exists()) {
+          const myPair = Object.values(cs.val()).find(v=>v&&(v.a===ME.username||v.b===ME.username));
+          if(myPair) {
+            const partner = myPair.a===ME.username?myPair.b:myPair.a;
+            const pm = await rget(db(`rooms/${curRoom}/members/${partner}`));
+            if(pm.exists()) bonus = 20;
+          }
+        }
+      }
+      await rupd(db(`users/${ME.username}`), {kc:(ME.kc||0)+bonus});
+      ME.kc = (ME.kc||0)+bonus;
+      navUpd();
+      toast(`+${bonus} KC từ treo máy!${bonus===20?' 💑×2':''}`);
+    }
+  }, 1000);
+}
+
+function stopHang() {
+  isHang = false;
+  if(hangTm) { clearInterval(hangTm); hangTm=null; } hangS=0;
+  const hi=document.getElementById('hic'), hl=document.getElementById('hlb');
+  if(hi) hi.textContent='☕'; if(hl) hl.textContent='Treo máy';
+}
+
+// =====================================================
+// FRIEND CHAT IN ROOM
+// =====================================================
+async function showFrChat() {
+  await reloadMe();
+  const frds = Object.keys(ME.friends||{});
+  let h = '';
+  if(!frds.length) { h='<div style="color:var(--mu);text-align:center;padding:10px">Chưa có bạn bè</div>'; }
+  else {
+    for(const f of frds) {
+      const s = await rget(db(`users/${f}`));
+      const fd = s.exists()?s.val():{username:f,name:f};
+      h+=`<div class="fi">
+        <img class="fiav" src="${av(fd)}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">
+        <div class="fiinfo"><div class="finame">${esc(fd.name||f)}</div><div class="fist">${fd.online?'🟢 Online':'⚫ Offline'}</div></div>
+        <button class="btn btn-p btn-s" onclick="cl('ovFC');openDM('${f}')">💬</button>
+      </div>`;
+    }
+  }
+  document.getElementById('fcL').innerHTML = h;
+  op('ovFC');
+}
+window.showFrChat = showFrChat;
+
+// =====================================================
+// FRIENDS TAB
+// =====================================================
+async function renderFriends(el) {
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--mu)">⏳</div>';
+  await reloadMe();
+  const reqs = ME.friendReqs||{};
+  const frds = ME.friends||{};
+  let h = '';
+  const reqKeys = Object.keys(reqs);
+  if(reqKeys.length) {
+    h += `<div class="card"><div class="stitle">📩 Yêu cầu kết bạn (${reqKeys.length})</div>`;
+    for(const u of reqKeys) {
+      const s=await rget(db(`users/${u}`)); const fd=s.exists()?s.val():{username:u,name:u};
+      h+=`<div class="fi">
+        <div class="fiaw"><img class="fiav" src="${av(fd)}" onerror="this.src='https://ui-avatars.com/api/?name=${esc(fd.name)}'"></div>
+        <div class="fiinfo" onclick="viewP('${u}')" style="cursor:pointer"><div class="finame">${esc(fd.name)}</div><div class="fist">Lv.${lv(fd.xp||0)} · ${esc(fd.gender||'')}</div></div>
+        <div class="fiac">
+          <button class="btn btn-g btn-s" onclick="accFr('${u}')">✓</button>
+          <button class="btn btn-d btn-s" onclick="rejFr('${u}')">✕</button>
+        </div></div>`;
+    }
+    h += `</div>`;
+  }
+  const fList = Object.keys(frds);
+  h += `<div class="card"><div class="stitle">👥 Bạn bè (${fList.length})</div>`;
+  if(!fList.length) { h+=`<div style="color:var(--mu);font-size:.81rem;text-align:center;padding:10px">Chưa có bạn bè</div>`; }
+  else {
+    for(const u of fList) {
+      const s=await rget(db(`users/${u}`)); const fd=s.exists()?s.val():{username:u,name:u};
+      h+=`<div class="fi">
+        <div class="fiaw"><img class="fiav" src="${av(fd)}" onerror="this.src='https://ui-avatars.com/api/?name=${esc(fd.name)}'">
+          ${fd.online?'<div class="odot"></div>':''}</div>
+        <div class="fiinfo" onclick="viewP('${u}')" style="cursor:pointer">
+          <div class="finame">${esc(fd.name)}</div>
+          <div class="fist">${fd.online?'🟢 Online':'⚫ Offline'} · Lv.${lv(fd.xp||0)}</div>
+        </div>
+        <div class="fiac">
+          <button class="btn btn-p btn-s" onclick="openDM('${u}')">💬</button>
+          <button class="btn btn-d btn-s" onclick="delFr('${u}')">🗑</button>
+        </div></div>`;
+    }
+  }
+  h += `</div>`;
+  el.innerHTML = h;
+  setBdg('fbdg', reqKeys.length);
+}
+
+async function sendFr(target) {
+  await reloadMe();
+  if(ME.friends&&ME.friends[target]) return toast('Đã là bạn bè!');
+  if(ME.sentFriendReqs&&ME.sentFriendReqs[target]) return toast('Đã gửi yêu cầu rồi!');
+  await rset(db(`users/${target}/friendReqs/${ME.username}`), true);
+  await rset(db(`users/${ME.username}/sentFriendReqs/${target}`), true);
+  await rpush(db(`users/${target}/notifications`), {type:'friendReq',from:ME.username,fromName:ME.name,ts:Date.now(),read:false});
+  toast('✅ Đã gửi yêu cầu kết bạn!');
+}
+window.sendFr = sendFr;
+
+async function accFr(fromUser) {
+  await rupd(db(`users/${ME.username}/friends`), {[fromUser]:true});
+  await rupd(db(`users/${fromUser}/friends`), {[ME.username]:true});
+  await rrem(db(`users/${ME.username}/friendReqs/${fromUser}`));
+  await rrem(db(`users/${fromUser}/sentFriendReqs/${ME.username}`));
+  await rpush(db(`users/${fromUser}/notifications`), {type:'friendAccepted',from:ME.username,fromName:ME.name,ts:Date.now(),read:false});
+  toast('✅ Đã kết bạn!'); swMain('friends');
+}
+window.accFr = accFr;
+
+async function rejFr(fromUser) {
+  await rrem(db(`users/${ME.username}/friendReqs/${fromUser}`));
+  await rrem(db(`users/${fromUser}/sentFriendReqs/${ME.username}`));
+  toast('❌ Đã từ chối'); swMain('friends');
+}
+window.rejFr = rejFr;
+
+async function delFr(target) {
+  if(!confirm('Xóa bạn bè?')) return;
+  await rrem(db(`users/${ME.username}/friends/${target}`));
+  await rrem(db(`users/${target}/friends/${ME.username}`));
+  toast('🗑️ Đã xóa bạn bè'); swMain('friends');
+}
+window.delFr = delFr;
+
+function setupFrL() {
+  Ls.freq = ronVal(db(`users/${ME.username}/friendReqs`), snap => {
+    setBdg('fbdg', snap.exists()?Object.keys(snap.val()).length:0);
+  });
+}
+
+// =====================================================
+// DM — REALTIME
+// =====================================================
+function openDM(friend) {
+  rget(db(`users/${friend}`)).then(s => {
+    const fd = s.exists()?s.val():{username:friend,name:friend};
+    curDMF = friend;
+    document.getElementById('dmAv').src = av(fd);
+    document.getElementById('dmName').textContent = fd.name||friend;
+    document.getElementById('dmSt').textContent = fd.online?'● Online':'● Offline';
+    document.getElementById('dmSt').style.color = fd.online?'var(--gn)':'var(--mu)';
+    document.getElementById('mainScreen').classList.remove('active');
+    document.getElementById('roomScreen').classList.remove('active');
+    document.getElementById('dmScreen').classList.add('active');
+    listenDM(friend);
+  });
+}
+window.openDM = openDM;
+
+function listenDM(friend) {
+  killL('dm');
+  const key = [ME.username, friend].sort().join('_');
+  Ls.dm = ronVal(db(`dms/${key}`), snap => {
+    const msgs = snap.exists() ? Object.values(snap.val()).sort((a,b)=>a.ts-b.ts) : [];
+    if(snap.exists()) {
+      const upd={};
+      Object.entries(snap.val()).forEach(([k,v])=>{ if(v.to===ME.username&&!v.read) upd[`dms/${key}/${k}/read`]=true; });
+      if(Object.keys(upd).length) rupd(rref(DB), upd);
+    }
+    const el = document.getElementById('dmMsgs');
+    const atBot = el.scrollHeight-el.scrollTop <= el.clientHeight+60;
+    el.innerHTML = msgs.map(m => {
+      const isMe = m.from===ME.username;
+      let body = '';
+      if(m.type==='img') {
+        body = `<img class="msg-img" src="${m.url}" onclick="showImgFull('${m.url}')" loading="lazy">`;
+      } else if(m.type==='voice') {
+        body = `<div class="vmsg" onclick="playVoice('${m.url}',this)">
+          <button class="vplay">▶</button>
+          <div class="vwave"></div>
+          <span class="vdur">${m.dur||'0:00'}</span>
+        </div>`;
+      } else {
+        body = `<div class="dmtxt">${esc(m.text||'')}</div>`;
+      }
+      return `<div class="dm${isMe?' me':''}">
+        <img class="dmav" src="${m.fromAvatar||'https://ui-avatars.com/api/?name=U'}" onerror="this.src='https://ui-avatars.com/api/?name=U'">
+        <div><div class="dmbbl">${body}<div class="dmtime">${tf(m.ts)}</div></div></div>
+      </div>`;
+    }).join('');
+    if(atBot) el.scrollTop = el.scrollHeight;
+    updNotifBdg();
+  });
+}
+
+async function sendDM() {
+  const inp = document.getElementById('dmIn');
+  const txt = inp.value.trim();
+  if(!txt||!curDMF) return;
+  inp.value='';
+  const key = [ME.username,curDMF].sort().join('_');
+  await rpush(db(`dms/${key}`), {from:ME.username,to:curDMF,fromName:ME.name,fromAvatar:ME.avatar||'',text:txt,ts:Date.now(),read:false});
+  await rpush(db(`users/${curDMF}/notifications`), {type:'dm',from:ME.username,fromName:ME.name,preview:txt.slice(0,40),ts:Date.now(),read:false});
+}
+window.sendDM = sendDM;
+
+async function delDMs() {
+  if(!confirm('Xóa tất cả tin nhắn?')) return;
+  const key = [ME.username,curDMF].sort().join('_');
+  await rrem(db(`dms/${key}`));
+  toast('🗑️ Đã xóa tin nhắn!');
+}
+window.delDMs = delDMs;
+
+function closeDM() {
+  killL('dm'); curDMF=null;
+  document.getElementById('dmScreen').classList.remove('active');
+  if(curRoom) document.getElementById('roomScreen').classList.add('active');
+  else document.getElementById('mainScreen').classList.add('active');
+}
+window.closeDM = closeDM;
+
+// =====================================================
+// NOTIFICATIONS
+// =====================================================
+function setupNotifL() {
+  Ls.notif = ronVal(db(`users/${ME.username}/notifications`), () => updNotifBdg());
+}
+
+async function updNotifBdg() {
+  const s = await rget(db(`users/${ME.username}/notifications`));
+  const cnt = s.exists() ? Object.values(s.val()).filter(n=>!n.read).length : 0;
+  setBdg('nbdg', cnt);
+  document.getElementById('ndot').classList.toggle('hidden', cnt===0);
+}
+
+async function renderNotif(el) {
+  el.innerHTML='<div style="text-align:center;padding:30px;color:var(--mu)">⏳</div>';
+  const s = await rget(db(`users/${ME.username}/notifications`));
+  if(!s.exists()) { el.innerHTML='<div class="card"><div style="color:var(--mu);text-align:center;padding:20px">Chưa có thông báo</div></div>'; return; }
+  const items = Object.entries(s.val()).sort((a,b)=>b[1].ts-a[1].ts);
+  // Đánh dấu đã đọc tất cả
+  const upd={};
+  items.forEach(([k,v])=>{ if(!v.read) upd[`users/${ME.username}/notifications/${k}/read`]=true; });
+  if(Object.keys(upd).length) await rupd(rref(DB), upd);
+  setBdg('nbdg',0); document.getElementById('ndot').classList.add('hidden');
+  const IC={dm:'💬',friendReq:'👋',friendAccepted:'🤝',gift:'🎁',coupleReq:'💑'};
+  const BG={dm:'rgba(0,180,255,.15)',friendReq:'rgba(0,224,150,.15)',friendAccepted:'rgba(0,224,150,.15)',gift:'rgba(255,204,0,.15)',coupleReq:'rgba(255,107,157,.15)'};
+  let h=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <span style="font-size:.72rem;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.8px">${items.length} thông báo</span>
+    <button onclick="delAllNotif()" style="background:var(--c2);border:1px solid var(--br);color:var(--rd);font-size:.75rem;font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:inherit">🗑 Xóa tất cả</button>
+  </div>`;
+  h+='<div class="card" style="padding:0;overflow:hidden">';
+  items.slice(0,50).forEach(([k,v])=>{
+    h+=`<div class="nit" style="padding:10px 12px;position:relative" id="nit_${k}">
+      <div class="nic" style="background:${BG[v.type]||'var(--c2)'}">${IC[v.type]||'🔔'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.81rem;line-height:1.4">${ntxt(v)}</div>
+        <div style="font-size:.66rem;color:var(--mu);margin-top:2px">${tf(v.ts)}</div>
+      </div>
+      <button onclick="delNotif('${k}')" style="background:none;border:none;color:var(--mu);font-size:1rem;cursor:pointer;padding:4px 6px;flex-shrink:0;line-height:1" title="Xóa">×</button>
+    </div>`;
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+async function delNotif(key) {
+  await rrem(db(`users/${ME.username}/notifications/${key}`));
+  const el = document.getElementById('nit_'+key);
+  if(el) el.remove();
+  // Nếu không còn thông báo nào thì hiện trống
+  const card = document.querySelector('#cnt .card');
+  if(card && !card.querySelector('.nit')) {
+    document.getElementById('cnt').innerHTML='<div class="card"><div style="color:var(--mu);text-align:center;padding:20px">Chưa có thông báo</div></div>';
+  }
+}
+window.delNotif = delNotif;
+
+async function delAllNotif() {
+  if(!confirm('Xóa tất cả thông báo?')) return;
+  await rrem(db(`users/${ME.username}/notifications`));
+  setBdg('nbdg',0);
+  document.getElementById('ndot').classList.add('hidden');
+  document.getElementById('cnt').innerHTML='<div class="card"><div style="color:var(--mu);text-align:center;padding:20px">Chưa có thông báo</div></div>';
+  toast('🗑️ Đã xóa tất cả thông báo!');
+}
+window.delAllNotif = delAllNotif;
+
+function ntxt(n) {
+  if(n.type==='dm') return `<b>${esc(n.fromName)}</b> nhắn: "${esc(n.preview||'...')}"`;
+  if(n.type==='friendReq') return `<b>${esc(n.fromName)}</b> muốn kết bạn với bạn`;
+  if(n.type==='friendAccepted') return `<b>${esc(n.fromName)}</b> đã chấp nhận kết bạn`;
+  if(n.type==='gift') return `<b>${esc(n.fromName)}</b> tặng bạn ${esc(n.gift||'quà')}`;
+  if(n.type==='coupleReq') return `<b>${esc(n.fromName)}</b> muốn ghép cặp với bạn`;
+  return 'Thông báo mới';
+}
+
+// =====================================================
+// PROFILE
+// =====================================================
+async function renderProfile(el) {
+  await reloadMe();
+  const lvi=lv(ME.xp||0), xi=xpnxt(ME.xp||0);
+  const cps=ME.couples||{}, frds=ME.friends||{};
+  let h=`<div class="ph">
+    <img class="pav" src="${av(ME)}" onerror="this.src='https://ui-avatars.com/api/?name=${esc(ME.name)}'">
+    <div class="pname">${esc(ME.name)}</div>
+    <div style="color:var(--mu);font-size:.76rem">@${esc(ME.username)} · ${esc(ME.gender||'')} · ${ME.age||'?'} tuổi</div>
+    <div class="plv">⭐ Cấp ${lvi}</div>
+    <div class="xpb"><div class="xpf" style="width:${xi.p}%"></div></div>
+    <div style="font-size:.66rem;color:var(--mu)">${xi.cur}/${xi.max} XP → Lv.${lvi+1}</div>
+    <div class="psts">
+      <div class="stb"><div class="stnum">${ME.kc||0}</div><div class="stlb">💰 KC</div></div>
+      <div class="stb"><div class="stnum">${ME.beans||0}</div><div class="stlb">🫘 Đậu</div></div>
+      <div class="stb"><div class="stnum">${Object.keys(frds).length}</div><div class="stlb">👥 Bạn</div></div>
+      <div class="stb"><div class="stnum">${Object.keys(cps).length}/5</div><div class="stlb">💑 Cặp</div></div>
+    </div>
+  </div>`;
+  if(ME.bio) h+=`<div class="card"><div class="stitle">💭 Tiểu sử</div><div style="font-size:.86rem;line-height:1.6">${esc(ME.bio)}</div></div>`;
+  if(Object.keys(cps).length) {
+    h+=`<div class="card"><div class="stitle">💑 Cặp đôi của tôi</div>`;
+    Object.keys(cps).forEach(p => {
+      h+=`<div class="fi" onclick="viewP('${p}')" style="cursor:pointer">
+        <span style="font-size:1.2rem">💑</span>
+        <div class="fiinfo"><div class="finame">${esc(p)}</div></div>
+        <button class="btn btn-d btn-s" onclick="event.stopPropagation();rmCpGlobal('${p}')">💔</button>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  h+=`<div class="card">
+    <div class="stitle">🫘 Đổi đậu → KC</div>
+    <div style="font-size:.81rem;color:var(--mu);margin-bottom:8px">Bạn có <b style="color:var(--a)">${ME.beans||0} đậu</b> · 10 đậu = 5 KC</div>
+    <button class="btn btn-y" onclick="exchB()">💱 Đổi đậu lấy KC</button>
+  </div>`;
+  h+=`<div class="card">
+    <button class="btn btn-2" style="margin-bottom:7px" onclick="prefillEP();op('ovEP')">✏️ Sửa hồ sơ</button>
+    <button class="btn btn-d" onclick="logout()">🚪 Đăng xuất</button>
+  </div>`;
+  el.innerHTML=h;
+}
+
+async function exchB() {
+  await reloadMe();
+  const b=ME.beans||0;
+  if(b<10) return toast('Cần ít nhất 10 đậu!');
+  const sets=~~(b/10), gain=sets*5, rem=b-sets*10;
+  await rupd(db(`users/${ME.username}`), {beans:rem,kc:(ME.kc||0)+gain});
+  ME.beans=rem; ME.kc=(ME.kc||0)+gain;
+  navUpd(); toast(`✅ Đổi ${sets*10} đậu → +${gain} KC!`); swMain('profile');
+}
+window.exchB = exchB;
+
+function prefillEP() {
+  document.getElementById('ep_n').value = ME.name||'';
+  document.getElementById('ep_a').value = ME.age||'';
+  document.getElementById('ep_g').value = ME.gender||'Nam';
+  document.getElementById('ep_b').value = ME.bio||'';
+  document.getElementById('ep_v').value = ME.avatar||'';
+  // Hiện ảnh hiện tại
+  prevAv(ME.avatar||'');
+}
+window.prefillEP = prefillEP;
+
+function prevAv(url) {
+  const img = document.getElementById('avPrev');
+  if(!img) return;
+  url = String(url).trim();
+  if(url && (url.startsWith('http://') || url.startsWith('https://'))) {
+    img.src = url;
+    img.onerror = () => { img.src = av({name: ME.name}); };
+  } else {
+    img.src = av({name: ME.name});
+    img.onerror = null;
+  }
+}
+window.prevAv = prevAv;
+
+async function saveProfile() {
+  const name = document.getElementById('ep_n').value.trim();
+  if(!name) return toast('Nhập tên hiển thị!');
+  const avatarInput = document.getElementById('ep_v').value.trim();
+  // Validate avatar URL
+  if(avatarInput && !avatarInput.startsWith('http://') && !avatarInput.startsWith('https://')) {
+    return toast('Link avatar phải bắt đầu bằng http:// hoặc https://');
+  }
+  const upd = {
+    name,
+    age: parseInt(document.getElementById('ep_a').value)||18,
+    gender: document.getElementById('ep_g').value,
+    bio: document.getElementById('ep_b').value.trim(),
+    avatar: avatarInput
+  };
+  await rupd(db(`users/${ME.username}`), upd);
+  Object.assign(ME, upd);
+  // Cập nhật avatar trong room nếu đang trong phòng
+  if(curRoom) {
+    await rupd(db(`rooms/${curRoom}/members/${ME.username}`), {name: upd.name, avatar: upd.avatar});
+  }
+  // Cập nhật nav avatar ngay lập tức
+  const navImg = document.getElementById('navAv');
+  navImg.src = av(ME);
+  navImg.onerror = () => imgErr(navImg, ME.name);
+  cl('ovEP');
+  toast('✅ Đã cập nhật hồ sơ!');
+  // Reload profile tab nếu đang xem
+  if(curTab === 'profile') swMain('profile');
+}
+window.saveProfile = saveProfile;
+
+// =====================================================
+// VIEW PROFILE (OTHER)
+// =====================================================
+async function viewP(username) {
+  const s = await rget(db(`users/${username}`));
+  if(!s.exists()) return toast('Không tìm thấy người dùng!');
+  const u=s.val(), lvi=lv(u.xp||0), xi=xpnxt(u.xp||0);
+  const cps=u.couples||{}, isFr=ME.friends&&ME.friends[username], isSelf=username===ME.username;
+  let h=`<div style="text-align:center;padding-bottom:10px">
+    <img style="width:66px;height:66px;border-radius:50%;object-fit:cover;border:3px solid var(--p)" src="${av(u)}" onerror="this.src='https://ui-avatars.com/api/?name=${esc(u.name)}'">
+    <div style="font-size:1.05rem;font-weight:800;margin-top:7px">${esc(u.name)}</div>
+    <div style="font-size:.71rem;color:var(--mu)">@${esc(u.username)}</div>
+    <div class="plv">⭐ Cấp ${lvi}</div>
+    <div class="xpb" style="max-width:150px;margin:3px auto"><div class="xpf" style="width:${xi.p}%"></div></div>
+    <div style="display:flex;gap:9px;justify-content:center;margin-top:6px;font-size:.76rem;flex-wrap:wrap">
+      <span>${esc(u.gender||'?')}</span><span>·</span><span>${u.age||'?'} tuổi</span>
+      <span>·</span><span style="color:${u.online?'var(--gn)':'var(--mu)'}">${u.online?'🟢 Online':'⚫ Offline'}</span>
+    </div>
+    ${Object.keys(cps).length?`<div style="background:rgba(255,107,157,.1);border-radius:8px;padding:4px 10px;margin-top:6px;font-size:.76rem">💑 Đang có ${Object.keys(cps).length} cặp đôi</div>`:'<div style="font-size:.71rem;color:var(--mu);margin-top:6px">💔 Chưa có cặp đôi</div>'}
+    ${u.bio?`<div style="background:var(--c2);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:.81rem;text-align:left">${esc(u.bio)}</div>`:''}
+  </div>`;
+  if(!isSelf) {
+    h+=`<div style="display:flex;gap:6px;margin-top:8px">
+      ${isFr
+        ?`<button class="btn btn-p btn-s" style="flex:1" onclick="cl('ovP');openDM('${username}')">💬 Nhắn tin</button>
+           <button class="btn btn-d btn-s" onclick="delFr('${username}');cl('ovP')">🗑</button>`
+        :`<button class="btn btn-p btn-s" style="flex:1" onclick="sendFr('${username}');cl('ovP')">+ Kết bạn</button>`
+      }
+    </div>`;
+  }
+  document.getElementById('pvC').innerHTML=h;
+  op('ovP');
+}
+window.viewP = viewP;
+
+// =====================================================
+// 📷 IMAGE UPLOAD — ImgBB (miễn phí)
+// =====================================================
+async function uploadImgBB(file) {
+  if(!IMGBB_KEY || IMGBB_KEY === 'YOUR_IMGBB_API_KEY') {
+    // Fallback: dùng base64 nhỏ nếu chưa có key (chỉ cho ảnh <200KB)
+    return new Promise((res,rej) => {
+      if(file.size > 200*1024) return rej(new Error('Ảnh quá lớn! Hãy thêm IMGBB_KEY trong code.'));
+      const reader = new FileReader();
+      reader.onload = e => res(e.target.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
+  }
+  const fd = new FormData();
+  fd.append('image', file);
+  const r = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {method:'POST', body:fd});
+  const d = await r.json();
+  if(!d.success) throw new Error(d.error?.message||'Upload thất bại');
+  return d.data.url;
+}
+
+async function sendDMImg(input) {
+  const file = input.files[0]; if(!file) return;
+  input.value='';
+  toast('⏳ Đang gửi ảnh...');
+  try {
+    const url = await uploadImgBB(file);
+    const key = [ME.username, curDMF].sort().join('_');
+    await rpush(db(`dms/${key}`), {from:ME.username,to:curDMF,fromName:ME.name,fromAvatar:ME.avatar||'',type:'img',url,ts:Date.now(),read:false});
+    await rpush(db(`users/${curDMF}/notifications`), {type:'dm',from:ME.username,fromName:ME.name,preview:'[Hình ảnh]',ts:Date.now(),read:false});
+  } catch(e) { toast('❌ Lỗi gửi ảnh: '+e.message); }
+}
+window.sendDMImg = sendDMImg;
+
+async function sendRoomImg(input) {
+  const file = input.files[0]; if(!file||!curRoom) return;
+  input.value='';
+  toast('⏳ Đang gửi ảnh...');
+  try {
+    const url = await uploadImgBB(file);
+    await rpush(db(`rooms/${curRoom}/chat`), {uid:ME.username,name:ME.name,avatar:ME.avatar||'',type:'img',url,ts:Date.now()});
+  } catch(e) { toast('❌ Lỗi gửi ảnh: '+e.message); }
+}
+window.sendRoomImg = sendRoomImg;
+
+// Xem ảnh phóng to
+function showImgFull(url) {
+  const d = document.createElement('div');
+  d.className = 'imgfull';
+  d.innerHTML = `<img src="${url}">`;
+  d.onclick = () => d.remove();
+  document.body.appendChild(d);
+}
+window.showImgFull = showImgFull;
+
+// =====================================================
+// 🎤 DM VOICE — Thu âm gửi tin nhắn thoại
+// =====================================================
+let dmRecorder = null, dmAudioChunks = [], dmRecStart = 0;
+
+async function toggleDMMic() {
+  const btn = document.getElementById('dmMicBtn');
+  if(dmRecorder && dmRecorder.state === 'recording') {
+    dmRecorder.stop();
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    dmAudioChunks = []; dmRecStart = Date.now();
+    dmRecorder = new MediaRecorder(stream, {mimeType: getSupportedMime()});
+    dmRecorder.ondataavailable = e => { if(e.data.size>0) dmAudioChunks.push(e.data); };
+    dmRecorder.onstop = async () => {
+      stream.getTracks().forEach(t=>t.stop());
+      btn.classList.remove('mic-on');
+      btn.textContent = '🎤';
+      const dur = fmtDur(Date.now()-dmRecStart);
+      const blob = new Blob(dmAudioChunks, {type: getSupportedMime()});
+      if(blob.size < 10) return;
+      toast('⏳ Đang gửi âm thanh...');
+      try {
+        // Encode sang base64 để lưu Firebase (chỉ cho voice ngắn <30s)
+        const b64 = await blobToBase64(blob);
+        const key = [ME.username, curDMF].sort().join('_');
+        await rpush(db(`dms/${key}`), {from:ME.username,to:curDMF,fromName:ME.name,fromAvatar:ME.avatar||'',type:'voice',url:b64,dur,ts:Date.now(),read:false});
+        await rpush(db(`users/${curDMF}/notifications`), {type:'dm',from:ME.username,fromName:ME.name,preview:'[Tin nhắn thoại]',ts:Date.now(),read:false});
+      } catch(e) { toast('❌ Lỗi gửi âm thanh: '+e.message); }
+    };
+    dmRecorder.start();
+    btn.classList.add('mic-on');
+    btn.textContent = '⏹';
+    toast('🔴 Đang thu âm... Bấm lại để dừng');
+  } catch(e) { toast('❌ Không truy cập được mic: '+e.message); }
+}
+window.toggleDMMic = toggleDMMic;
+
+// =====================================================
+// 🎤 ROOM VOICE — WebRTC P2P multi-peer
+// =====================================================
+let localStream = null, roomPeers = {}, roomMicOn = false;
+// Signaling qua Firebase: rooms/{id}/webrtc/{fromUser}/{toUser}/...
+
+async function toggleRoomMic() {
+  const btn = document.getElementById('rmicBtn');
+  if(roomMicOn) {
+    stopRoomMic();
+    btn.classList.remove('mic-on');
+    btn.textContent = '🎤';
+    toast('🔇 Đã tắt mic');
+  } else {
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+      roomMicOn = true;
+      btn.classList.add('mic-on');
+      btn.textContent = '🔴';
+      toast('🎤 Mic bật — đang kết nối...');
+      // Thông báo cho phòng biết mình đang dùng mic
+      await rset(db(`rooms/${curRoom}/voice/${ME.username}`), {name:ME.name, avatar:ME.avatar||'', ts:Date.now()});
+      rDisc(db(`rooms/${curRoom}/voice/${ME.username}`)).remove();
+      // Lắng nghe người khác vào/ra voice
+      setupVoiceListeners();
+    } catch(e) { toast('❌ Không truy cập mic: '+e.message); }
+  }
+}
+window.toggleRoomMic = toggleRoomMic;
+
+function stopRoomMic() {
+  roomMicOn = false;
+  if(localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream=null; }
+  Object.values(roomPeers).forEach(pc => pc.close());
+  roomPeers = {};
+  if(curRoom) rrem(db(`rooms/${curRoom}/voice/${ME.username}`));
+  killL('voice','webrtc');
+  updateVoiceBar({});
+}
+
+function setupVoiceListeners() {
+  killL('voice');
+  // Theo dõi danh sách người đang dùng mic
+  Ls.voice = ronVal(db(`rooms/${curRoom}/voice`), snap => {
+    const users = snap.exists() ? snap.val() : {};
+    updateVoiceBar(users);
+    // Kết nối P2P với người mới
+    Object.keys(users).forEach(uid => {
+      if(uid !== ME.username && !roomPeers[uid]) {
+        // Người join sau sẽ gửi offer
+        if(ME.username > uid) createOffer(uid);
+      }
+    });
+    // Đóng kết nối với người đã rời
+    Object.keys(roomPeers).forEach(uid => {
+      if(!users[uid]) { roomPeers[uid].close(); delete roomPeers[uid]; }
+    });
+  });
+  // Lắng nghe signaling messages gửi đến mình
+  Ls.webrtc = ronVal(db(`rooms/${curRoom}/webrtc/${ME.username}`), snap => {
+    if(!snap.exists()) return;
+    Object.entries(snap.val()).forEach(([fromUid, data]) => {
+      if(data.offer) handleOffer(fromUid, data.offer, data.offerTs);
+      if(data.answer) handleAnswer(fromUid, data.answer);
+      if(data.ice) handleIce(fromUid, data.ice);
+    });
+  });
+}
+
+function updateVoiceBar(users) {
+  const el = document.getElementById('vbarUsers');
+  if(!el) return;
+  if(!Object.keys(users).length) { el.innerHTML='<span style="font-size:.65rem;color:var(--mu)">Chưa ai bật mic</span>'; return; }
+  el.innerHTML = Object.entries(users).map(([uid,d]) => `
+    <div class="vuser" id="vu_${uid}">
+      <img src="${av({avatar:d.avatar,name:d.name||uid})}" id="vui_${uid}">
+      <span class="vun">${esc(d.name||uid)}</span>
+    </div>`).join('');
+}
+
+async function createOffer(toUid) {
+  const pc = newPC(toUid);
+  roomPeers[toUid] = pc;
+  if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  await rset(db(`rooms/${curRoom}/webrtc/${toUid}/${ME.username}/offer`), {sdp:offer.sdp, type:offer.type});
+  await rset(db(`rooms/${curRoom}/webrtc/${toUid}/${ME.username}/offerTs`), Date.now());
+}
+
+async function handleOffer(fromUid, offer, ts) {
+  if(roomPeers[fromUid]) return; // đã có kết nối
+  const pc = newPC(fromUid);
+  roomPeers[fromUid] = pc;
+  if(localStream) localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+  await pc.setRemoteDescription(new RTCSessionDescription(offer));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  await rset(db(`rooms/${curRoom}/webrtc/${fromUid}/${ME.username}/answer`), {sdp:answer.sdp, type:answer.type});
+  // Xóa offer đã xử lý
+  await rrem(db(`rooms/${curRoom}/webrtc/${ME.username}/${fromUid}/offer`));
+}
+
+async function handleAnswer(fromUid, answer) {
+  const pc = roomPeers[fromUid];
+  if(!pc || pc.signalingState !== 'have-local-offer') return;
+  await pc.setRemoteDescription(new RTCSessionDescription(answer));
+  await rrem(db(`rooms/${curRoom}/webrtc/${ME.username}/${fromUid}/answer`));
+}
+
+async function handleIce(fromUid, iceList) {
+  const pc = roomPeers[fromUid];
+  if(!pc) return;
+  const items = Array.isArray(iceList) ? iceList : Object.values(iceList);
+  for(const ice of items) {
+    try { await pc.addIceCandidate(new RTCIceCandidate(ice)); } catch(e){}
+  }
+}
+
+function newPC(remoteUid) {
+  const pc = new RTCPeerConnection(STUN);
+  const iceBuf = [];
+  pc.onicecandidate = async e => {
+    if(!e.candidate) {
+      // Gửi tất cả ICE candidates 1 lần
+      if(iceBuf.length) await rset(db(`rooms/${curRoom}/webrtc/${remoteUid}/${ME.username}/ice`), iceBuf);
+      return;
+    }
+    iceBuf.push({candidate:e.candidate.candidate, sdpMid:e.candidate.sdpMid, sdpMLineIndex:e.candidate.sdpMLineIndex});
+  };
+  pc.ontrack = e => {
+    // Phát audio từ peer
+    let audio = document.getElementById('pa_'+remoteUid);
+    if(!audio) {
+      audio = document.createElement('audio');
+      audio.id = 'pa_'+remoteUid;
+      audio.autoplay = true;
+      audio.style.display = 'none';
+      document.body.appendChild(audio);
+    }
+    audio.srcObject = e.streams[0];
+    // Hiệu ứng "đang nói"
+    detectSpeaking(e.streams[0], remoteUid);
+  };
+  pc.onconnectionstatechange = () => {
+    if(pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+      pc.close(); delete roomPeers[remoteUid];
+      const a = document.getElementById('pa_'+remoteUid);
+      if(a) a.remove();
+    }
+  };
+  return pc;
+}
+
+// Phát hiện khi user đang nói (visual indicator)
+function detectSpeaking(stream, uid) {
+  try {
+    const ctx = new AudioContext();
+    const src = ctx.createMediaStreamSource(stream);
+    const an = ctx.createAnalyser();
+    an.fftSize = 256;
+    src.connect(an);
+    const data = new Uint8Array(an.frequencyBinCount);
+    const img = document.getElementById('vui_'+uid);
+    const check = () => {
+      if(!roomMicOn && !roomPeers[uid]) return;
+      an.getByteFrequencyData(data);
+      const vol = data.reduce((a,b)=>a+b,0)/data.length;
+      if(img) img.classList.toggle('speaking', vol>15);
+      requestAnimationFrame(check);
+    };
+    check();
+  } catch(e){}
+}
+
+// =====================================================
+// 🔊 VOICE PLAYBACK
+// =====================================================
+let currentVoiceAudio = null;
+function playVoice(url, el) {
+  if(currentVoiceAudio) { currentVoiceAudio.pause(); currentVoiceAudio=null; }
+  const btn = el.querySelector('.vplay');
+  const wave = el.querySelector('.vwave');
+  const audio = new Audio(url);
+  currentVoiceAudio = audio;
+  audio.play().catch(()=>{});
+  if(btn) btn.textContent='⏸';
+  audio.ontimeupdate = () => {
+    if(!audio.duration) return;
+    const pct = (audio.currentTime/audio.duration*100)+'%';
+    if(wave) wave.style.background = `linear-gradient(90deg,var(--bl) ${pct},var(--br) ${pct})`;
+  };
+  audio.onended = () => { if(btn) btn.textContent='▶'; if(wave) wave.style.background='var(--br)'; currentVoiceAudio=null; };
+}
+window.playVoice = playVoice;
+
+// =====================================================
+// 🛠 UTILS cho audio
+// =====================================================
+function getSupportedMime() {
+  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+  return types.find(t => MediaRecorder.isTypeSupported(t)) || 'audio/webm';
+}
+
+function blobToBase64(blob) {
+  return new Promise((res,rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+function fmtDur(ms) {
+  const s = Math.floor(ms/1000);
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+</script>
+</body>
+</html>
+
+<!--
+╔══════════════════════════════════════════════════════════════════╗
+║  FIREBASE REALTIME DATABASE RULES                               ║
+║  Vào: Firebase Console → Realtime Database → Rules → Publish    ║
+╚══════════════════════════════════════════════════════════════════╝
+
+{
+  "rules": {
+
+    "users": {
+      ".read": true,
+      "$uid": {
+        ".write": true,
+        "password": {
+          ".read": true,
+          ".write": true
+        },
+        "kc":       { ".write": true, ".read": true },
+        "xp":       { ".write": true, ".read": true },
+        "beans":    { ".write": true, ".read": true },
+        "online":   { ".write": true, ".read": true },
+        "myRoom":   { ".write": true, ".read": true },
+        "friends":  { ".write": true, ".read": true },
+        "couples":  { ".write": true, ".read": true },
+        "friendReqs":     { ".write": true, ".read": true },
+        "sentFriendReqs": { ".write": true, ".read": true },
+        "notifications":  { ".write": true, ".read": true }
+      }
+    },
+
+    "rooms": {
+      ".read": true,
+      "$roomId": {
+        ".write": true,
+        ".read": true,
+        "name":      { ".write": true },
+        "active":    { ".write": true },
+        "hostName":  { ".write": true },
+        "members": {
+          ".write": true,
+          ".read": true,
+          "$uid": { ".write": true, ".read": true }
+        },
+        "seats": {
+          ".write": true,
+          ".read": true,
+          "$uid": { ".write": true, ".read": true }
+        },
+        "chat": {
+          ".write": true,
+          ".read": true,
+          "$msgId": { ".write": true, ".read": true }
+        },
+        "music": {
+          ".write": true,
+          ".read": true
+        },
+        "couples": {
+          ".write": true,
+          ".read": true,
+          "$pairId": { ".write": true, ".read": true }
+        },
+        "coupleReqs": {
+          ".write": true,
+          ".read": true,
+          "$reqId": { ".write": true, ".read": true }
+        },
+        "kicked": {
+          ".write": true,
+          ".read": true,
+          "$uid": { ".write": true, ".read": true }
+        },
+        "voice": {
+          ".write": true,
+          ".read": true,
+          "$uid": { ".write": true, ".read": true }
+        },
+        "webrtc": {
+          ".write": true,
+          ".read": true,
+          "$toUser": {
+            "$fromUser": { ".write": true, ".read": true }
+          }
+        }
+      }
+    },
+
+    "dms": {
+      ".read": true,
+      "$chatKey": {
+        ".write": true,
+        ".read": true,
+        "$msgId": { ".write": true, ".read": true }
+      }
+    }
+
+  }
+}
+
+╔══════════════════════════════════════════════════════════════════╗
+║  DEPLOY — 3 BƯỚC                                                ║
+║  1. Dán Rules trên vào Firebase Console → Publish               ║
+║  2. Sửa FIREBASE_CONFIG trong file HTML                         ║
+║  3. Deploy lên Netlify / Vercel (kéo thả file HTML là xong)     ║
+╚══════════════════════════════════════════════════════════════════╝
+-->
